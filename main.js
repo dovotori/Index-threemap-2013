@@ -367,6 +367,14 @@ extraPoints.push(projection([179,-37]));
 
 
 
+
+
+
+
+
+
+
+
 /////////////////////////////////////////////
 //////////// CANVAS ////////////////////////
 ////////////////////////////////////////////
@@ -376,7 +384,6 @@ var Canvas = function()
 	this.camera;
 	this.renderer;
 	this.scene;
-	this.rayon;
 	this.centreCarte;
 	this.positionInitCam;
 	this.xSouris;
@@ -388,64 +395,43 @@ var Canvas = function()
 		var VIEW_ANGLE = 45,
 		    ASPECT = WIDTH / HEIGHT,
 		    NEAR = 0.1,
-		    FAR = 10000000;
+		    FAR = 10000;
 
-		 var w = 100, h = 100;
 
 		this.scrollSouris = 100
 
-		this.centreCarte = projection([0,0])
-		this.positionInitCam = projection([0,-89])
-		console.log(this.positionInitCam)
+		this.centreCarte = projection([0,0]);
+		this.positionInitCam = projection([0,-89]);
 
 		//this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-		this.camera = new THREE.OrthographicCamera( h*36 / - 2, h*36 / 2, w*18 / 2, w*18 / - 2, NEAR, FAR );
-		//this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1]-290, -1000);
-		this.camera.up = new THREE.Vector3(0, 0, -1);
+		this.camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 10000 );
+		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -1000);
 		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
-		
-
+		this.camera.up = new THREE.Vector3(0, 0, -1);
 
 		this.scene = new THREE.Scene();
 	
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(WIDTH, HEIGHT);
-		this.renderer.setClearColor("#888888", 1);
+		this.renderer.setClearColor("#ffffff", 1);
 
-		this.renderer.shadowMapEnabled = true;
-		this.renderer.shadowMapSoft = true;
 
-		this.renderer.shadowCameraNear = 3;
-		this.renderer.shadowCameraFar = this.camera.far;
-		this.renderer.shadowCameraFov = 50;
+		var materialMesh = new THREE.MeshBasicMaterial({ 
+	    	color: 0xff0000
+	    });
 
-		this.renderer.shadowMapBias = 0.0039;
-		this.renderer.shadowMapDarkness = 0.5;
-		this.renderer.shadowMapWidth = 1024;
-		this.renderer.shadowMapHeight = 1024;
+		var cube = new THREE.Mesh(new THREE.CubeGeometry(20, 20, 20), materialMesh);
+		cube.position.set(0, 0, 0);
+	    this.scene.add(cube);
+
+
 	
 		document.body.appendChild(this.renderer.domElement);
 		
 		var clone = this;
-		
-		//document.addEventListener("scroll", function(event){ clone.interactionScroll(event); }, false);
-		//document.addEventListener("keydown", function(event){ clone.interactionClavier(event); }, false);
-		
 		document.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
-		document.addEventListener("mousewheel", function(event){ clone.onMouseScroll(event); }, false);
-		document.addEventListener("DOMMouseScroll", function(event){ clone.onMouseScroll(event); }, false);
-
-
-
-		// window.addEventListener("mousewheel", this.onMouseScroll);
-		// window.addEventListener("DOMMouseScroll", this.onMouseScroll);
-		// window.addEventListener("mousemove", this.onMouseScroll);
-
-		// document.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
-
-
-
-
+		//document.addEventListener("mousewheel", function(event){ clone.onMouseScroll(event); }, false);
+		//document.addEventListener("DOMMouseScroll", function(event){ clone.onMouseScroll(event); }, false);
 
 	}
 	
@@ -459,11 +445,12 @@ var Canvas = function()
 	
 	this.onMouseMove = function(event)
 	{
-
-		
-		this.xSouris = event.clientX;
-
-		this.positionCamera();
+		var xSouris = event.clientX;
+		//this.positionCamera();
+		this.camera.position.x = map(xSouris, 0, window.innerWidth, -1000, 1000);
+		//this.camera.position.y = map(xSouris, 0, window.innerWidth, -1000, 1000);
+		//this.camera.position.z = map(xSouris, 0, window.innerWidth, -1000, 1000);
+		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
 		return false;
 	}
 
@@ -475,8 +462,6 @@ var Canvas = function()
 	    this.scrollSouris += delta;
 	    this.scrollSouris = Math.min(this.scrollSouris, 70);
 	    this.scrollSouris = Math.max(this.scrollSouris, 40);
-
-	    console.log( this.scrollSouris)
 		
 		this.positionCamera();
 	    return false;
@@ -493,7 +478,6 @@ var Canvas = function()
 		var rayonMax = projection([180,0]);
 			rayonMax = rayonMax[1];
 
-
 		angleOrbiteCamera =  angleMax * this.xSouris / largeurFenetre;
 		//calcul du rayon de l'orbite de la caméra
 		rayonOrbiteCamera = this.positionInitCam[1]*this.scrollSouris/100
@@ -502,6 +486,7 @@ var Canvas = function()
 		this.camera.position.x = coordonneesCamera[0]+this.positionInitCam[0];
 		this.camera.position.y = coordonneesCamera[1];
 		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+
 	}
 
 
