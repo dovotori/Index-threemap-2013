@@ -388,18 +388,19 @@ var Canvas = function()
 		var VIEW_ANGLE = 45,
 		    ASPECT = WIDTH / HEIGHT,
 		    NEAR = 0.1,
-		    FAR = 10000;
+		    FAR = 10000000;
+
+		 var w = 100, h = 100;
 
 		this.scrollSouris = 100
 
-		this.rayon = 1000;
-		
 		this.centreCarte = projection([0,0])
 		this.positionInitCam = projection([0,-89])
 		console.log(this.positionInitCam)
 
-		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -300);
+		//this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
+		this.camera = new THREE.OrthographicCamera( h*36 / - 2, h*36 / 2, w*18 / 2, w*18 / - 2, NEAR, FAR );
+		//this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1]-290, -1000);
 		this.camera.up = new THREE.Vector3(0, 0, -1);
 		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
 		
