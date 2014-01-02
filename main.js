@@ -15,7 +15,7 @@ var projection = d3.geo
 	
 var largeurFenetre = window.innerWidth;
 var path = d3.geo.path().projection(projection);
-var scrollSouris = 0;
+
 
 
 
@@ -142,6 +142,45 @@ var Dessin = function()
 		var MG = projection([-180,0]);
 		var MD = projection([180,0]);
 
+		var extraPoints = []
+
+extraPoints.push(projection([-180,-28]));
+extraPoints.push(projection([-139,-28]));
+extraPoints.push(projection([-110,-5]));
+extraPoints.push(projection([-90,0]));
+extraPoints.push(projection([-79,10]));
+extraPoints.push(projection([-80,29]));
+extraPoints.push(projection([-69,37]));
+extraPoints.push(projection([-29,4]));
+extraPoints.push(projection([-70,-15]));
+extraPoints.push(projection([-50,-29]));
+extraPoints.push(projection([-80,-69]));
+extraPoints.push(projection([18,-70]));
+extraPoints.push(projection([-10,-38]));
+extraPoints.push(projection([-20,-16]));
+extraPoints.push(projection([-20,-1]));
+extraPoints.push(projection([4,0]));
+extraPoints.push(projection([9,5]));
+extraPoints.push(projection([19,22]));
+extraPoints.push(projection([30,22]));
+extraPoints.push(projection([50,15]));
+extraPoints.push(projection([59,-5]));
+extraPoints.push(projection([78,10]));
+extraPoints.push(projection([89,-1]));
+extraPoints.push(projection([109,22]));
+extraPoints.push(projection([149,29]));
+extraPoints.push(projection([179,28]));
+extraPoints.push(projection([179,4]));
+extraPoints.push(projection([131,-11]));
+extraPoints.push(projection([179,-37]));
+
+	for (var i=0; i< extraPoints.length ; i++){
+		this.centroid.push( [ extraPoints[i][0] , extraPoints[i][1] , 0 ]);		
+	}
+
+
+
+
 		this.centroid.push( [ HG[0] , HG[1] , 0 ]);
 		this.centroid.push( [ HD[0] , HD[1] , 0 ]);
 		this.centroid.push( [ BD[0] , BD[1] , 0 ]);
@@ -154,17 +193,17 @@ var Dessin = function()
 			linewidth: 1
 	    });
 	    this.material2 = new THREE.LineBasicMaterial({
-	        color: 0x0000ff,
-			transparent: true, opacity: 0.2
+	        color: 0xffffff,
+			transparent: true, opacity: 0
 	    });
 	    this.material3 = new THREE.LineBasicMaterial({
 	        color: 0x6666ff,
-			transparent: true, opacity: 0.2
+			transparent: true, opacity: 1
 	    });	
 
 	    this.materialMesh = new THREE.MeshLambertMaterial({
 	    	color: 0xffffff,
-	    	transparent: true, opacity: 1
+	    	transparent: true, opacity: 0.8
 	    });
 		this.materialMesh.side = THREE.DoubleSide;
 		
@@ -220,7 +259,7 @@ var Dessin = function()
 				// calcul du centroid
 				var centroidTemporaire = path.centroid(data.features[k]);
 
-				var centro = [centroidTemporaire[0], centroidTemporaire[1], (k-180)*0.3 ];
+				var centro = [centroidTemporaire[0], centroidTemporaire[1], -(k)*0.2 ];
 
 				
 				this.centroid.push( centro );
@@ -338,7 +377,11 @@ var Canvas = function()
 	this.renderer;
 	this.scene;
 	this.rayon;
-	
+	this.centreCarte;
+	this.positionInitCam;
+	this.xSouris;
+	this.scrollSouris;
+
 	this.setup = function(WIDTH, HEIGHT)
 	{
 
@@ -347,15 +390,21 @@ var Canvas = function()
 		    NEAR = 0.1,
 		    FAR = 10000;
 
-		this.rayon = 1000;
-	
-		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-		this.camera.position.set(400, 200, -1000);
-		this.camera.up = new THREE.Vector3(0, -1, 0);
+		this.scrollSouris = 100
 
-		var targetCam = projection([0,0]);
-		this.camera.lookAt(new THREE.Vector3(targetCam[0], targetCam[1], 0));
+		this.rayon = 1000;
 		
+		this.centreCarte = projection([0,0])
+		this.positionInitCam = projection([0,-89])
+		console.log(this.positionInitCam)
+
+		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
+		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -300);
+		this.camera.up = new THREE.Vector3(0, 0, -1);
+		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+		
+
+
 		this.scene = new THREE.Scene();
 	
 		this.renderer = new THREE.WebGLRenderer();
@@ -377,10 +426,24 @@ var Canvas = function()
 		document.body.appendChild(this.renderer.domElement);
 		
 		var clone = this;
-		document.addEventListener("mousemove", function(event){ clone.interactionSouris(event); }, false);
+		
 		//document.addEventListener("scroll", function(event){ clone.interactionScroll(event); }, false);
 		//document.addEventListener("keydown", function(event){ clone.interactionClavier(event); }, false);
 		
+		document.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
+		document.addEventListener("mousewheel", function(event){ clone.onMouseScroll(event); }, false);
+		document.addEventListener("DOMMouseScroll", function(event){ clone.onMouseScroll(event); }, false);
+
+
+
+		// window.addEventListener("mousewheel", this.onMouseScroll);
+		// window.addEventListener("DOMMouseScroll", this.onMouseScroll);
+		// window.addEventListener("mousemove", this.onMouseScroll);
+
+		// document.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
+
+
+
 
 
 	}
@@ -393,46 +456,53 @@ var Canvas = function()
 	}
 	
 	
-	this.interactionScroll = function(event)
+	this.onMouseMove = function(event)
 	{
-		console.log(event);
+
+		
+		this.xSouris = event.clientX;
+
+		this.positionCamera();
+		return false;
 	}
+
+	this.onMouseScroll = function(e) {
+
+	    // cross-browser wheel delta
+	    var e = window.event || e;
+	    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+	    this.scrollSouris += delta;
+	    this.scrollSouris = Math.min(this.scrollSouris, 70);
+	    this.scrollSouris = Math.max(this.scrollSouris, 40);
+
+	    console.log( this.scrollSouris)
+		
+		this.positionCamera();
+	    return false;
 	
-	this.interactionSouris = function(event)
-	{
-
-		var mouseX = event.clientX;	
-		var mouseY = event.clientY;
-		
-		var angle = map(mouseX, 0, window.innerWidth, 0, 360);
-
-		var targetCam = projection([0,0]);
-
-		// mouvement de bas en haut
-		var coor = positionCamera(mouseX);
-		console.log(coor[0]+" "+coor[1]);
-		this.camera.position.x = coor[0];
-		this.camera.position.y = coor[1];
-		//this.camera.position.z = map(mouseY, 0, window.innerHeight, 0, -2000);
-		
-		// camera regarde le centre de la carte
-		this.camera.lookAt(new THREE.Vector3(targetCam[0], targetCam[1], 0));
-		
 	}
 
-
-
-	this.interactionClavier = function(event)
+	this.positionCamera = function()
 	{
+
+		var coordonneesCamera = []
+		var angleMax = 180;
+		var angleOrbiteCamera, rayonOrbiteCamera;
+		var rayonMin = 100;
+		var rayonMax = projection([180,0]);
+			rayonMax = rayonMax[1];
+
+
+		angleOrbiteCamera =  angleMax * this.xSouris / largeurFenetre;
+		//calcul du rayon de l'orbite de la caméra
+		rayonOrbiteCamera = this.positionInitCam[1]*this.scrollSouris/100
+		coordonneesCamera = [Math.cos(angleOrbiteCamera*(Math.PI/180))*rayonOrbiteCamera, Math.sin(angleOrbiteCamera*(Math.PI/180))*rayonOrbiteCamera] ;
 		
-		/*if(event.keyCode == 40)
-		{
-			this.camera.position.y += 10;
-		} else if (event.keyCode == 38){
-			this.camera.position.y -= 10;
-		}*/
-		
+		this.camera.position.x = coordonneesCamera[0]+this.positionInitCam[0];
+		this.camera.position.y = coordonneesCamera[1];
+		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
 	}
+
 
 	
 	
@@ -445,37 +515,10 @@ var Canvas = function()
 
 
 
-function positionCamera(xSouris)
-{
-	var coordonneesCamera = [], limiteAngle;
-	var angleOrbiteCamera, rayonOrbiteCamera;
-	var rayonMin = 100;
-	var rayonMax = projection([0,180]);
-	rayonMax = rayonMax[1];
-
-	angleOrbiteCamera = largeurFenetre * xSouris / limiteAngle;
-	rayonOrbiteCamera = map(scrollSouris, 0, 100, rayonMin, rayonMax); 
-	coordonneesCamera[0] = Math.cos(angleOrbiteCamera)*rayonOrbiteCamera;
-	coordonneesCamera[1] = Math.sin(angleOrbiteCamera)*rayonOrbiteCamera;
-
-	return coordonneesCamera;
-}
 
 
 
-window.addEventListener("mousewheel", mouseWheelHandler);
-window.addEventListener("DOMMouseScroll", mouseWheelHandler);
-function mouseWheelHandler(e) {
-    // cross-browser wheel delta
-    var e = window.event || e;
-    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-    scrollSouris += delta;
-    scrollSouris = Math.min(scrollSouris, 100);
-    scrollSouris = Math.max(scrollSouris, 0);
 
-    console.log(scrollSouris);
-    return false;
-}
 
 
 
