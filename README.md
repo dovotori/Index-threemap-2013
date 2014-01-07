@@ -1,6 +1,6 @@
 
 
-- caméra isometrique ou projection orthogonale
+- caméra isometrique ou projection orthogonale OK
 - texture de la carte projetée sur le relief
 - centroid basé sur la position des capitales
 - fonction de transition pour la caméra et pour le mouvements des points
