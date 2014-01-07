@@ -12,9 +12,13 @@ var projection = d3.geo
 	.mercator();
 	//.conicEquidistant();
 	//.orthographic();
+var path = d3.geo.path().projection(projection);
 	
 var largeurFenetre = window.innerWidth;
-var path = d3.geo.path().projection(projection);
+
+var width = largeurFenetre;
+var height = window.innerHeight;
+var imageTexture;
 
 
 
@@ -36,13 +40,63 @@ function setup()
 function ready(error, results) 
 {
 
+
+
+	// dessin de la carte avec d3
+	var svg = d3.select("#conteneur").append("svg")
+		.attr("width", width)
+	    .attr("height", height)
+	    .attr("id","svg");
+
+
+	    
+	var carted3js = svg.attr("id", "carted3js");
+	carted3js.selectAll("path").data(results[0].features).enter()
+		.append("svg:path")
+		.attr("id", function(d){ return d.id; })
+		.attr("d", path)
+		.style("stroke", "#000")
+		.style("fill", "rgba(100,240,136,1)");
+
+
+	var svgImg = document.getElementById("carted3js");
+
+    // transforme le svg en image
+    var xml = new XMLSerializer().serializeToString(svgImg);
+	var data2 = "data:image/svg+xml;base64," + btoa(xml);
+	
+	imageTexture = new Image();
+	imageTexture.setAttribute('src', data2),
+	document.body.appendChild(imageTexture);
+
+	// creation du canvas 2d
+	var canvas2d = document.createElement( "canvas" );
+	canvas2d.width = width;
+	canvas2d.height = height;
+
+	var context = canvas2d.getContext( '2d' );
+	
+
+	context.drawImage(imageTexture, 0, 0);
+	imageTextureData = context.getImageData( 0, 0, width, height );
+	context.putImageData( imageTextureData, 0, 0 );
+	//document.body.appendChild(canvas2d);
+
+	var textureCarted3js = new THREE.Texture( canvas2d );
+	textureCarted3js.needsUpdate = true;
+
+
+
+
+
+	// dessin 3d
 	canvas = new Canvas();
 	canvas.setup(window.innerWidth, window.innerHeight);
 	
 	dessin = new Dessin();
-	dessin.setup(canvas.scene);
+	dessin.setup(canvas.scene, textureCarted3js);
 	dessin.draw(canvas.scene, results[0], results[1]);
-	
+
 	animate();
 
 }
@@ -56,7 +110,6 @@ function animate()
 
 	requestAnimationFrame( animate );	
 	canvas.draw();
-
 }
 
 
@@ -124,7 +177,7 @@ var Dessin = function()
 
 
 
-	this.setup = function(scene)
+	this.setup = function(scene, textureCarted3js)
 	{
 		this.centroid = [];
 
@@ -142,7 +195,7 @@ var Dessin = function()
 
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
-	    	map: texture,
+	    	map: textureCarted3js,
 	    	//color:0xffee99,
 	    	side: THREE.DoubleSide
 	    });
@@ -305,9 +358,9 @@ var Dessin = function()
 			geometrie.faces.push( new THREE.Face3( 3*i, 1+3*i, 2+3*i ));
 
 		    geometrie.faceVertexUvs[0].push([
-		        new THREE.Vector2( map(delaunay[i][0][0],1,1000,0,1), map(delaunay[i][0][1],1,1000,1,0) ),
-		        new THREE.Vector2( map(delaunay[i][1][0],1,1000,0,1), map(delaunay[i][1][1],1,1000,1,0) ),
-		        new THREE.Vector2( map(delaunay[i][2][0],1,1000,0,1), map(delaunay[i][2][1],1,1000,1,0) )
+		        new THREE.Vector2( map(delaunay[i][0][0],1,width,0,1), map(delaunay[i][0][1],1,height,1,0) ),
+		        new THREE.Vector2( map(delaunay[i][1][0],1,width,0,1), map(delaunay[i][1][1],1,height,1,0) ),
+		        new THREE.Vector2( map(delaunay[i][2][0],1,width,0,1), map(delaunay[i][2][1],1,height,1,0) )
 	        ]);
 
 	    }
@@ -406,9 +459,10 @@ var Canvas = function()
 	this.onMouseMove = function(event)
 	{
 		this.xSouris = event.clientX;
+
 		this.positionCamera();
 		//this.camera.position.x = map(this.xSouris, 0, window.innerWidth, -1000, 1000);
-		//this.camera.position.y = map(xSouris, 0, window.innerWidth, -1000, 1000);
+		//this.camera.position.z = map(event.clientY, 0, window.innerHeight, -1000, 1000);
 		//this.camera.position.z = map(xSouris, 0, window.innerWidth, -1000, 1000);
 		//this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
 		return false;
