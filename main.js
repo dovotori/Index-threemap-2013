@@ -13,28 +13,17 @@ var canvas;
 var dessin;
 var projection = d3.geo
 	//.azimuthalEqualArea();
-	.mercator();
 	//.conicEquidistant();
 	//.orthographic();
+	.mercator();
 projection.scale(80);
 var path = d3.geo.path().projection(projection);
 	
 var imageTexture;
+var centroid;
 
 
 
-
-
-
-function setup()
-{	
-
-	queue()
-		.defer(lireJson, "world-countries-clean.json")
-		.defer(lireCsv, "index2013.csv")
-		.awaitAll(ready);
-	
-}
 
 
 
@@ -47,7 +36,14 @@ function lireJson(url, callback) {
 }
 
 
-
+function setup()
+{	
+	queue()
+		.defer(lireJson, "world-countries-clean.json")
+		.defer(lireCsv, "index2013.csv")
+		.awaitAll(ready);
+	
+}
 
 
 
@@ -55,11 +51,29 @@ function lireJson(url, callback) {
 function ready(error, results) 
 {
 
+	centroid = [];
+
+	var HG = projection([-180,84]);
+	var HD = projection([180,84]);
+	var BD = projection([180,-66]);
+	var BG = projection([-180,-66]);
+	var MG = projection([-180,0]);
+	var MD = projection([180,0]);
+
+	centroid.push( [ HG[0] , HG[1] , 0 ]);
+	centroid.push( [ HD[0] , HD[1] , 0 ]);
+	centroid.push( [ BD[0] , BD[1] , 0 ]);
+	centroid.push( [ BG[0] , BG[1] , 0 ]);
+	centroid.push( [ MG[0] , MG[1] , 0 ]);
+	centroid.push( [ MD[0] , MD[1] , 0 ]);
+
+
 	// dessin de la carte avec d3
 	var svg = d3.select("#conteneur").append("svg")
 		.attr("width", width)
 	    .attr("height", height)
 	    .attr("id","svg");
+
 
 	    
 	var carted3js = svg.attr("id", "carted3js");
@@ -68,7 +82,57 @@ function ready(error, results)
 		.attr("id", function(d){ return d.id; })
 		.attr("d", path)
 		.style("stroke", "#000")
-		.style("fill", "rgba(100,240,136,1)");
+		.style("fill", "rgba(100,240,136,1)")
+		.each(function(d){  
+
+			// verifie si le pays est indexé
+			for(var i = 0; i < results[1].length; i++)
+			{
+
+				// affecte la hauteur;
+				var hauteur = 0;
+				if(results[1][i].iso == d.id)
+				{
+					switch(results[1][i].cat)
+					{
+						case "Very serious situation":
+							hauteur = 1;
+						break;
+						case "Difficult situation":
+							hauteur = 0.8;
+						break; 
+
+						case "Noticeable problems":
+							hauteur = 0.6;
+						break;
+						case "Satisfactory situation":
+							hauteur = 0.4;
+						break;
+						case "Good situation":
+							hauteur = 0;
+						break;
+						default:
+							hauteur = 0;
+						break;
+				
+					}
+
+					// ajout dans les centroids
+					var centroidTemporaire = path.centroid(d);
+					centroid.push( [ centroidTemporaire[0], centroidTemporaire[1], -hauteur*20 ]);	
+
+				}	
+			}
+
+		});
+
+
+
+
+
+
+
+
 
 
 	var svgImg = document.getElementById("carted3js");
@@ -97,6 +161,12 @@ function ready(error, results)
 	// creation de la texture THREE
 	var textureCarted3js = new THREE.Texture( canvas2d );
 	textureCarted3js.needsUpdate = true;
+
+
+
+
+
+
 
 
 	// dessin 3d
@@ -132,6 +202,7 @@ function animate()
 
 
 
+
 /////////////////////////////////////////////
 //////////// DESSIN ////////////////////////
 ////////////////////////////////////////////
@@ -139,25 +210,12 @@ function animate()
 var Dessin = function()
 {
 	this.materialMesh;
-	this.centroid;
 
 
 
 
 	this.setup = function(scene, textureCarted3js)
 	{
-
-		console.log(textureCarted3js);
-
-		this.centroid = [];
-
-		var HG = projection([-180,84]);
-		var HD = projection([180,84]);
-		var BD = projection([180,-66]);
-		var BG = projection([-180,-66]);
-		var MG = projection([-180,0]);
-		var MD = projection([180,0]);
-
 		
 
 		//MATERIAL
@@ -167,12 +225,8 @@ var Dessin = function()
 	    	side: THREE.DoubleSide
 	    });
 
-		this.centroid.push( [ HG[0] , HG[1] , 0 ]);
-		this.centroid.push( [ HD[0] , HD[1] , 0 ]);
-		this.centroid.push( [ BD[0] , BD[1] , 0 ]);
-		this.centroid.push( [ BG[0] , BG[1] , 0 ]);
-		this.centroid.push( [ MG[0] , MG[1] , 0 ]);
-		this.centroid.push( [ MD[0] , MD[1] , 0 ]);
+
+		
 		
 
 	}
@@ -180,24 +234,11 @@ var Dessin = function()
 
 
 
-	this.draw = function(scene, data, dataIndex)
+	this.draw = function(scene)
 	{		
-	
-		this.dessinerNotesPays(scene);
 
-	}
-	
-
-
-	
-
-
-
-	
-	this.dessinerNotesPays = function(scene)
-	{
-
-		var delaunay = d3.geom.delaunay(this.centroid);
+		
+		var delaunay = d3.geom.delaunay(centroid);
 
 	    var geometrie = new THREE.Geometry();
 
@@ -222,7 +263,9 @@ var Dessin = function()
 	    mesh.doubleSided = true;		
 	    scene.add(mesh);
 
+
 	}
+	
 
 }
 
@@ -276,7 +319,7 @@ var Canvas = function()
 
 		//this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
 		this.camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 10000 );
-		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -1000);
+		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -400);
 		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
 		this.camera.up = new THREE.Vector3(0, 0, -1);
 		this.scene.add(this.camera);
@@ -286,10 +329,17 @@ var Canvas = function()
 		this.renderer.setClearColor("#ffffff", 1);
 
 		// LIGHT
-		this.scene.add( new THREE.AmbientLight( 0x212223 ) );
-		var light = new THREE.DirectionalLight( 0xffffff, 0.1 );
-		light.position.set( -200, 0, -200 );
-		this.scene.add(light);
+		this.scene.add( new THREE.AmbientLight( 0x888888 ) );
+
+		var spot1 = new THREE.DirectionalLight( 0x1111cc, 1 );
+		spot1.position.set( -200, 0, -200 );
+		this.scene.add(spot1);
+
+		var spot2 = new THREE.DirectionalLight( 0xcc1111, 0.4 );
+		spot2.position.set( 200, 0, -200 );
+		this.scene.add(spot2);
+
+
 
 		document.body.appendChild(this.renderer.domElement);
 		
@@ -313,7 +363,7 @@ var Canvas = function()
 
 		this.positionCamera();
 		//this.camera.position.x = map(this.xSouris, 0, window.innerWidth, -1000, 1000);
-		//this.camera.position.z = map(event.clientY, 0, window.innerHeight, -1000, 1000);
+		//this.camera.position.z = map(event.clientY, 0, window.innerHeight, 0, -1000);
 		//this.camera.position.z = map(xSouris, 0, window.innerWidth, -1000, 1000);
 		//this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
 		return false;
@@ -351,7 +401,7 @@ var Canvas = function()
 		
 		this.camera.position.x = coordonneesCamera[0]+this.positionInitCam[0];
 		this.camera.position.y = coordonneesCamera[1];
-		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+		this.camera.lookAt( new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100) );
 
 	}
 
