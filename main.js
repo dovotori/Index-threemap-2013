@@ -18,11 +18,10 @@ var projection = d3.geo
 	.mercator();
 projection.scale(80);
 var path = d3.geo.path().projection(projection);
-	
-var imageTexture;
-var centroid;
-var centroid2d;
 
+
+var pointsStructure;
+var paysIdPlace;
 
 
 
@@ -49,8 +48,8 @@ function setup()
 function ready(error, results) 
 {
 
-	centroid = [];
-	centroid2d = [];
+	pointsStructure = [];
+	paysIdPlace = [];
 
 
 	ajoutDesPointsDuFormatDeLaCarte();
@@ -104,6 +103,8 @@ function animate()
 function dessinDeLaCarteTexture(results0, results1)
 {
 
+	var cptId = pointsStructure.length;
+
 
 	// dessin de la carte avec d3
 	var svg = d3.select("#conteneur").append("svg")
@@ -138,16 +139,19 @@ function dessinDeLaCarteTexture(results0, results1)
 						.text("#"+results1[i].an2013+" / "+results1[i].name);
 					
 
-					// ajout dans les centroids
+					// ajout des centroids
 					var centroidTemporaire = path.centroid(d);
 					var hauteur = map(results1[i].an2013, 0, 180, 0, 20);
-					centroid.push( [ centroidTemporaire[0], centroidTemporaire[1], -hauteur*1.4 ] );
-					centroid2d.push({ x: centroidTemporaire[0], y: centroidTemporaire[1], z: -hauteur*1.4 });
+					pointsStructure.push({ x: centroidTemporaire[0], y: centroidTemporaire[1], z: -hauteur*1.4 });
+					paysIdPlace.push([ d.id, cptId, parseInt(results1[i].an2013) ]);
+					cptId++;
 
 				}
 			}
 
 		});
+
+		
 }
 
 
@@ -163,19 +167,12 @@ function ajoutDesPointsDuFormatDeLaCarte()
 	var MG = projection([-180,	0]);
 	var MD = projection([180,	0]);
 
-	centroid.push( [ HG[0] , HG[1] , 0 ]);
-	centroid.push( [ HD[0] , HD[1] , 0 ]);
-	centroid.push( [ MG[0] , MG[1] , 0 ]);
-	centroid.push( [ MD[0] , MD[1] , 0 ]);
-	centroid.push( [ BG[0] , BG[1] , 0 ]);
-	centroid.push( [ BD[0] , BD[1] , 0 ]);
-
-	centroid2d.push({ x: HG[0], y: HG[1], z:0 });
-	centroid2d.push({ x: HD[0], y: HD[1], z:0 });
-	centroid2d.push({ x: MG[0], y: MG[1], z:0 });
-	centroid2d.push({ x: MD[0], y: MD[1], z:0 });
-	centroid2d.push({ x: BG[0], y: BG[1], z:0 });
-	centroid2d.push({ x: BD[0], y: BD[1], z:0 });
+	pointsStructure.push({ x: HG[0], y: HG[1], z:0 });
+	pointsStructure.push({ x: HD[0], y: HD[1], z:0 });
+	pointsStructure.push({ x: MG[0], y: MG[1], z:0 });
+	pointsStructure.push({ x: MD[0], y: MD[1], z:0 });
+	pointsStructure.push({ x: BG[0], y: BG[1], z:0 });
+	pointsStructure.push({ x: BD[0], y: BD[1], z:0 });
 
 
 	var nbPointsParCote = 20;
@@ -186,16 +183,10 @@ function ajoutDesPointsDuFormatDeLaCarte()
 		var pointLigneGauche = projection([ -180, map(i, 0, nbPointsParCote, -84, 84)]);
 		var pointLigneDroite = projection([ 180, map(i, 0, nbPointsParCote, -84, 84)]);
 
-		centroid.push( [ pointLigneHaut[0] , pointLigneHaut[1] , 0 ]);
-		centroid.push( [ pointLigneBas[0] , pointLigneBas[1] , 0 ]);
-		centroid.push( [ pointLigneGauche[0] , pointLigneGauche[1] , 0 ]);
-		centroid.push( [ pointLigneDroite[0] , pointLigneDroite[1] , 0 ]);
-
-
-		centroid2d.push({ x: pointLigneHaut[0] , 	y:pointLigneHaut[1], z:0 });
-		centroid2d.push({ x: pointLigneBas[0] , 	y:pointLigneBas[1], z:0 });
-		centroid2d.push({ x: pointLigneGauche[0] , y:pointLigneGauche[1], z:0 });
-		centroid2d.push({ x: pointLigneDroite[0] , y:pointLigneDroite[1], z:0 });
+		pointsStructure.push({ x: pointLigneHaut[0] , 	y:pointLigneHaut[1], z:0 });
+		pointsStructure.push({ x: pointLigneBas[0] , 	y:pointLigneBas[1], z:0 });
+		pointsStructure.push({ x: pointLigneGauche[0] , y:pointLigneGauche[1], z:0 });
+		pointsStructure.push({ x: pointLigneDroite[0] , y:pointLigneDroite[1], z:0 });
 	}
 }
 
@@ -226,8 +217,7 @@ function ajoutDesPointsDesFrontieresDesPays()
 		{
 
 			var extraPoint = projection([ points[j], points[j+1] ]);
-			//centroid2d.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });
-			//centroid.push( [ extraPoint[0] , extraPoint[1] , 0 ]);
+			//pointsStructure.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });
 
 		}
 		
@@ -238,14 +228,14 @@ function ajoutDesPointsDesFrontieresDesPays()
 
 function creationCanvasTexture()
 {
-	
+
 	var svgImg = document.getElementById("carted3js");
 
     // transforme le svg en image
     var xml = new XMLSerializer().serializeToString(svgImg);
 	var data2 = "data:image/svg+xml;base64," + btoa(xml);
 	
-	imageTexture = new Image(); 
+	var imageTexture = new Image(); 
 	imageTexture.setAttribute('src', data2);
 
 	// creation du canvas 2d
@@ -290,8 +280,8 @@ var Dessin = function()
 		
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
-	    	//map: textureCarted3js,
-	    	color:0xffee99,
+	    	map: textureCarted3js,
+	    	//color:0xffee99,
 	    	side: THREE.DoubleSide,
 	    	//wireframe: true, 
 	    	//wireframeLinewidth: 1
@@ -306,45 +296,53 @@ var Dessin = function()
 
 
 
-    	var delaunay = d3.geom.delaunay(centroid);
-		var delaunay2 = triangulate(centroid2d);
+		
 
 	    geometrie = new THREE.Geometry();
 
-	    for (var i=0; i < delaunay2.length; i++ )
+	    for (var i = 0; i < pointsStructure.length; i++ )
 	    {
-	    	geometrie.vertices.push(new THREE.Vector3(delaunay2[i].a.x, delaunay2[i].a.y, delaunay2[i].a.z));
-	    	geometrie.vertices.push(new THREE.Vector3(delaunay2[i].b.x, delaunay2[i].b.y, delaunay2[i].b.z));
-	    	geometrie.vertices.push(new THREE.Vector3(delaunay2[i].c.x, delaunay2[i].c.y, delaunay2[i].c.z));
-	    	geometrie.faces.push( new THREE.Face3( 3*i, 1+3*i, 2+3*i ));
+			geometrie.vertices.push({ x: pointsStructure[i].x, y: pointsStructure[i].y, z: pointsStructure[i].z });
+		}
 
-	    	geometrie.faceVertexUvs[0].push([
-		        new THREE.Vector2( map(delaunay2[i].a.x, 0,width, 0,1), map(delaunay2[i].a.y, 0,height, 1,0) ),
-		        new THREE.Vector2( map(delaunay2[i].b.x, 0,width, 0,1), map(delaunay2[i].b.y, 0,height, 1,0) ),
-		        new THREE.Vector2( map(delaunay2[i].c.x, 0,width, 0,1), map(delaunay2[i].c.y, 0,height, 1,0) )
+		var delaunay = triangulate(pointsStructure);
+
+
+		for (var i=0; i < delaunay.length; i++ )
+		{
+			// trouver les ids des vertices de chaque triangles
+			var id_a, id_b, id_c;
+			for(var k=0; k < geometrie.vertices.length; k++ )
+			{
+				if(delaunay[i].a.x == geometrie.vertices[k].x && delaunay[i].a.y == geometrie.vertices[k].y && delaunay[i].a.z == geometrie.vertices[k].z)
+				{
+					id_a = k;
+				}
+				if(delaunay[i].b.x == geometrie.vertices[k].x && delaunay[i].b.y == geometrie.vertices[k].y && delaunay[i].b.z == geometrie.vertices[k].z)
+				{
+					id_b = k;
+				}
+				if(delaunay[i].c.x == geometrie.vertices[k].x && delaunay[i].c.y == geometrie.vertices[k].y && delaunay[i].c.z == geometrie.vertices[k].z)
+				{
+					id_c = k;
+				}
+			}
+			geometrie.faces.push( new THREE.Face3( id_a, id_b, id_c ));
+
+			// coordonnees de textures
+			geometrie.faceVertexUvs[0].push([
+		        new THREE.Vector2( map(geometrie.vertices[id_a].x, 0,width, 0,1), map(geometrie.vertices[id_a].y, 0,height, 1,0) ),
+		        new THREE.Vector2( map(geometrie.vertices[id_b].x, 0,width, 0,1), map(geometrie.vertices[id_b].y, 0,height, 1,0) ),
+		        new THREE.Vector2( map(geometrie.vertices[id_c].x, 0,width, 0,1), map(geometrie.vertices[id_c].y, 0,height, 1,0) )
 	        ]);
+		}
 
-	  		// geometrie.vertices.push(new THREE.Vector3(delaunay[i][0][0], delaunay[i][0][1], delaunay[i][0][2]));
-			// geometrie.vertices.push(new THREE.Vector3(delaunay[i][1][0], delaunay[i][1][1], delaunay[i][1][2]));
-			// geometrie.vertices.push(new THREE.Vector3(delaunay[i][2][0], delaunay[i][2][1], delaunay[i][2][2]));
-			// geometrie.faces.push( new THREE.Face3( 3*i, 1+3*i, 2+3*i ));
-
-		 //    geometrie.faceVertexUvs[0].push([
-		 //        new THREE.Vector2( map(delaunay[i][0][0], 0,width, 0,1), map(delaunay[i][0][1], 0,height, 1,0) ),
-		 //        new THREE.Vector2( map(delaunay[i][1][0], 0,width, 0,1), map(delaunay[i][1][1], 0,height, 1,0) ),
-		 //        new THREE.Vector2( map(delaunay[i][2][0], 0,width, 0,1), map(delaunay[i][2][1], 0,height, 1,0) )
-	  //       ]);
-
-	    }
-
-	    geometrie.computeFaceNormals();
+		geometrie.computeFaceNormals();
 
 	    this.mesh = new THREE.Mesh(geometrie, this.materialMesh);
 	    this.mesh.doubleSided = true;		
 	    scene.add(this.mesh);
 
-		// var particleSystem = new THREE.ParticleSystem( geometrie, this.materialParticule );
-		// scene.add(particleSystem);
 		
 	}
 
