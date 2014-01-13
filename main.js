@@ -22,6 +22,7 @@ var path = d3.geo.path().projection(projection);
 
 var pointsStructure;
 var paysIdPlace;
+var currentYear;
 
 
 
@@ -39,7 +40,7 @@ function setup()
 {	
 	queue()
 		.defer(lireJson, "world-countries-clean.json")
-		.defer(lireCsv, "index2013.csv")
+		.defer(lireCsv, "index.csv")
 		.awaitAll(ready);
 	
 }
@@ -50,6 +51,7 @@ function ready(error, results)
 
 	pointsStructure = [];
 	paysIdPlace = [];
+	currentYear = 2013;
 
 
 	ajoutDesPointsDuFormatDeLaCarte();
@@ -388,7 +390,7 @@ var Dessin = function()
 
 		for(var i = 0; i < paysIdPlace.length; i++)
       	{
-			this.transition[i].setup( this.mesh.geometry.vertices[paysIdPlace[i][1]].z, getRandom(0, 60) );
+			this.transition[i].setup( this.mesh.geometry.vertices[paysIdPlace[i][1]].z, getRandom(0, -60) );
 			this.transition[i].setTween(1);
 			this.transition[i].setSpeed(0.1);
 		}
@@ -562,7 +564,7 @@ function changerAnnee()
 {
 
 	queue()
-		.defer(lireCsv, "index2013.csv")
+		.defer(lireCsv, "index.csv")
 		.awaitAll(readyChangementAnnee);
 
 }
@@ -573,17 +575,23 @@ function changerAnnee()
 function readyChangementAnnee(errors, results)
 {
 
+
 	for(var i = 0; i < results[0].length; i++)
 	{
 		var iso = results[0][i].iso;
 		var item = d3.select("#"+iso);
+
 		//item.style("top", (results[0][i].an2012*20)+"px");
-		//item.style("color", "red");
+		
 	}
 
-	var items = d3.selectAll(".itemPays");
-	//var items = d3.select("#FIN");
-	items.style("color", "red");
+	
+
+
+	// d3.selectAll(".itemPays").data().enter()
+	// data(item)
+
+	
 
 	dessin.changementAnnee();
 

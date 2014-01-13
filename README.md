@@ -4,6 +4,7 @@
 - texture de la carte projetée sur le relief OK
 
 
+- capitales
 - attendre que la texture d3.js soit chargée
 - centroid basé sur la position des capitales
 - fonction de transition pour la caméra
@@ -31,4 +32,4 @@ Pays manquants sur la carte
 A tester
 - lumiere opposée à la camera
 - profondeur de champs
-
+- traits
