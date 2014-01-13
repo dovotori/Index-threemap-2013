@@ -67,7 +67,7 @@ function ready(error, results)
 	dessin = new Dessin();
 	dessin.setup(canvas.scene, textureCarted3js);
 	
-	//document.addEventListener("click", changerAnnee, false);
+	document.addEventListener("click", changerAnnee, false);
 
 	animate();
 
@@ -264,6 +264,11 @@ function creationCanvasTexture()
 
 
 
+
+
+
+
+
 /////////////////////////////////////////////
 //////////// THREE /////////////////////////
 ////////////////////////////////////////////
@@ -271,13 +276,16 @@ function creationCanvasTexture()
 var Dessin = function()
 {
 	this.materialMesh;
+	this.materialParticule;
 	this.mesh;
+	this.transition;
 
 
 
 	this.setup = function(scene, textureCarted3js)
 	{
-		
+		this.transition = [];
+
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
 	    	map: textureCarted3js,
@@ -295,9 +303,18 @@ var Dessin = function()
 
 
 
+	    // TRANSITION
+	    for(var i =0; i < paysIdPlace.length; i++)
+	    {
+	    	this.transition[i] = new Transition();
+	    }
+
 
 		
 
+
+
+	    // DESSIN
 	    geometrie = new THREE.Geometry();
 
 	    for (var i = 0; i < pointsStructure.length; i++ )
@@ -352,12 +369,31 @@ var Dessin = function()
 	this.draw = function(scene)
 	{		
 
-		
-	    //this.mesh.geometry.verticesNeedUpdate = true;
+		if(!this.transition[0].isFinished)
+      	{
+      		for(var i = 0; i < paysIdPlace.length; i++)
+      		{
+				this.mesh.geometry.vertices[paysIdPlace[i][1]].z = this.transition[i].execute();
+			}
+			this.mesh.geometry.verticesNeedUpdate = true;
+			
+      	}
 
 	}
 
 
+
+	this.changementAnnee = function(scene)
+	{
+
+		for(var i = 0; i < paysIdPlace.length; i++)
+      	{
+			this.transition[i].setup( this.mesh.geometry.vertices[paysIdPlace[i][1]].z, getRandom(0, 60) );
+			this.transition[i].setTween(1);
+			this.transition[i].setSpeed(0.1);
+		}
+
+	}
 
 	
 }
@@ -545,11 +581,11 @@ function readyChangementAnnee(errors, results)
 		//item.style("color", "red");
 	}
 
-	//var items = d3.selectAll(".itemPays");
-	var items = d3.select("#FIN");
+	var items = d3.selectAll(".itemPays");
+	//var items = d3.select("#FIN");
 	items.style("color", "red");
 
-	dessin.redraw();
+	dessin.changementAnnee();
 
 
 }
