@@ -24,6 +24,7 @@ var path = d3.geo.path().projection(projection);
 var pointsStructure;
 var paysIdPlace;
 var currentYear;
+var hauteurMax;
 
 
 
@@ -53,10 +54,11 @@ function ready(error, results)
 	pointsStructure = [];
 	paysIdPlace = [];
 	currentYear = 0;
+	hauteurMax = 16;
 
 
 	ajoutDesPointsDuFormatDeLaCarte();
-	//ajoutDesPointsDesFrontieresDesPays();
+	ajoutDesPointsDesFrontieresDesPays();
 	dessinDeLaCarteTexture(results[0], results[1]);
 
 	// creation de la texture THREE
@@ -165,9 +167,10 @@ function dessinDeLaCarteTexture(results0, results1)
 	var svg = d3.select("#conteneur").append("svg")
 		.attr("width", width)
 	    .attr("height", height)
+	    .style("background-color", "#000")
 	    .attr("id","svg");
 
-	    
+
 	var carted3js = svg.attr("id", "carted3js");
 	carted3js.selectAll("path").data(results0.features).enter()
 		.append("svg:path")
@@ -213,7 +216,7 @@ function dessinDeLaCarteTexture(results0, results1)
 						var x = traductionCoor[0];
 						var y = traductionCoor[1];
 						
-						pointsStructure.push({ x: x, y: y, z: -map(results1[i].an2013, 0, 180, 0, 40) });
+						pointsStructure.push({ x: x, y: y, z: -map(results1[i].an2013, 0, 180, 0, hauteurMax) });
 						//pointsStructure.push([ x, y, --map(results1[i].an2013, 0, 180, 0, 40) ]);
 						paysIdPlace.push([ d.id, cptId, [ parseInt(results1[i].an2013),  parseInt(results1[i].an2012)] ]);
 						cptId++;
@@ -248,27 +251,72 @@ function ajoutDesPointsDesFrontieresDesPays()
 	
 	var svg = obj.contentDocument;
 	
+
+	// polygons
 	var polygons = svg.getElementsByTagName("polygon");
+	var cpt = 0;
 	
-	for(var i = 0; i < polygons.length; i++)
+	if(polygons.length > 0)
 	{
-		var strPoints = polygons[i].getAttribute("points");
-		strPoints = strPoints.replace(/\s{2,}/g, " ");	// supprime double espace
-		strPoints = strPoints.replace(/\t/g, "");		// supprime tabulation
-		strPoints = strPoints.replace(/,/g, " ");		// supprime virgule
-
-		var points = strPoints.split(" ");
-
-		for(var j = 0; j < points.length-1; j += 2)		// car dernier element vide
+		for(var i = 0; i < polygons.length; i++)
 		{
+			var strPoints = polygons[i].getAttribute("points");
+			strPoints = strPoints.replace(/\s{2,}/g, " ");	// supprime double espace
+			strPoints = strPoints.replace(/\t/g, "");		// supprime tabulation
+			strPoints = strPoints.replace(/,/g, " ");		// supprime virgule
+
+			var points = strPoints.split(" ");
+
+			for(var j = 0; j < points.length-1; j += 2)		// car dernier element vide
+			{
+				if(points[j+1] >= 84){ points[j+1] = 84; } 
+				if(points[j+1] <= -84){ points[j+1] = -84; } 
+				var extraPoint = projection([ points[j], points[j+1] ]);
+				pointsStructure.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });	
+			}
+		}	
+	}
+
+
+
+	
+	// path
+	var paths = svg.getElementsByTagName("path");
+	for(var i = 0; i < paths.length; i++) 
+	{
+		var strPath = paths[i].getAttribute("d");
+		strPath = strPath.replace(/[ZzVvMmHhCcSs,Ll]/g, " ");
+		strPath = strPath.replace(/-/g," -");
+		strPath = strPath.replace(/  /g, " ");
+		strPath = strPath.replace(/  /g, " ");
+		strPath = strPath.replace(/  /g, " ");
+		strPath = strPath.replace(/  /g, " ");
+		
+		//console.log(strPath);
+		points = strPath.split(" ");
+
+		var cpt = 0;
+		for(var j = 0; j < points.length; j+=2) // dernier vide
+		{
+			console.log(points[j]);
+			//console.log(points[j]+" "+points[j+1]);
+
+			if(points[j+1] >= 84){ points[j+1] = 84; } 
+			if(points[j+1] <= -84){ points[j+1] = -84; } 
 
 			var extraPoint = projection([ points[j], points[j+1] ]);
-			pointsStructure.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });	
-
+			pointsStructure.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });
+			//console.log(extraPoint[0]+" / "+extraPoint[1]);
 		}
-		
 	}
+
 }
+
+
+
+
+
+
 
 
 
@@ -324,14 +372,18 @@ var Dessin = function()
 {
 	this.materialMesh;
 	this.materialParticule;
+	this.materialLine;
+
 	this.mesh;
 	this.transition;
+	this.lines;
 
 
 
 	this.setup = function(scene, textureCarted3js)
 	{
 		this.transition = [];
+		this.lines = [];
 
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
@@ -346,6 +398,12 @@ var Dessin = function()
 	    this.materialParticule = new THREE.ParticleBasicMaterial({
       		color: 0xFF0000,
       		size: 4
+    	});
+
+    	this.materialLine = new THREE.LineBasicMaterial({ 
+    		color:0x0000ff,
+    		transparent: true, 
+    		opacity: 0.3
     	});
 
 
@@ -408,13 +466,30 @@ var Dessin = function()
 
 		geometrie.computeFaceNormals();
 
-	    this.mesh = new THREE.Mesh(geometrie, this.materialMesh);
-	    this.mesh.doubleSided = true;		
-	    scene.add(this.mesh);
+	     this.mesh = new THREE.Mesh(geometrie, this.materialMesh);
+	    // this.mesh.doubleSided = true;		
+	    // scene.add(this.mesh);
 		
-		
+	    var particleSystem = new THREE.ParticleSystem( geometrie, this.materialParticule );
+ 		scene.add(particleSystem);
+
+		this.drawLines(scene);
 	}
 
+
+
+	this.drawLines = function(scene)
+	{
+		for(var i = 0; i < paysIdPlace.length; i++)
+      	{
+			var geometrie = new THREE.Geometry();
+			geometrie.vertices.push(new THREE.Vector3(this.mesh.geometry.vertices[paysIdPlace[i][1]].x, this.mesh.geometry.vertices[paysIdPlace[i][1]].y, this.mesh.geometry.vertices[paysIdPlace[i][1]].z));
+			geometrie.vertices.push(new THREE.Vector3(this.mesh.geometry.vertices[paysIdPlace[i][1]].x, this.mesh.geometry.vertices[paysIdPlace[i][1]].y, (this.mesh.geometry.vertices[paysIdPlace[i][1]].z*40)-50));
+			geometrie.vertices.push(new THREE.Vector3(0, this.mesh.geometry.vertices[paysIdPlace[i][1]].y, (this.mesh.geometry.vertices[paysIdPlace[i][1]].z*40)-50));
+			this.lines[i] = new THREE.Line(geometrie, this.materialLine);
+			scene.add(this.lines[i]);
+		}
+	}
 
 
 
@@ -426,6 +501,7 @@ var Dessin = function()
       		for(var i = 0; i < paysIdPlace.length; i++)
       		{
 				this.mesh.geometry.vertices[paysIdPlace[i][1]].z = this.transition[i].execute();
+
 			}
 			this.mesh.geometry.verticesNeedUpdate = true;
 			
@@ -435,12 +511,16 @@ var Dessin = function()
 
 
 
+
+
+
 	this.changementAnnee = function(scene)
 	{
 
 		for(var i = 0; i < paysIdPlace.length; i++)
       	{
-			this.transition[i].setup( this.mesh.geometry.vertices[paysIdPlace[i][1]].z, -map(paysIdPlace[i][2][currentYear], 0, 180, 0, 40 ));
+      		//this.lines[i].
+			this.transition[i].setup( this.mesh.geometry.vertices[paysIdPlace[i][1]].z, -map(paysIdPlace[i][2][currentYear], 0, 180, 0, hauteurMax ));
 			this.transition[i].setTween(1);
 			this.transition[i].setSpeed(0.1);
 		}
@@ -506,6 +586,7 @@ var Canvas = function()
 		this.hauteurFenetre = 800;
 
 		this.scene = new THREE.Scene();
+		this.scene.fog = new THREE.Fog( 0x000000, 1, FAR/8 );
 
 		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
 		//this.camera = new THREE.OrthographicCamera( this.largeurFenetre / - 2, this.largeurFenetre / 2, this.hauteurFenetre / 2, this.hauteurFenetre / - 2, 1, 10000 );
@@ -613,9 +694,7 @@ var Canvas = function()
 function changerAnnee()
 {
 
-	// queue()
-	// 	.defer(lireCsv, "index.csv")
-	// 	.awaitAll(readyChangementAnnee);
+
 
 
 	if(currentYear < 1)
@@ -630,31 +709,6 @@ function changerAnnee()
 }
 
 
-
-
-function readyChangementAnnee(errors, results)
-{
-
-	/*
-	for(var i = 0; i < results[0].length; i++)
-	{
-		var iso = results[0][i].iso;
-		var item = d3.select("#"+iso);
-
-		//item.style("top", (results[0][i].an2012*20)+"px");
-		
-	}
-	*/
-
-	// d3.selectAll(".itemPays").data().enter()
-	// data(item)
-
-	
-
-	
-
-
-}
 
 
 
