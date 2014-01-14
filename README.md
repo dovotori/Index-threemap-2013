@@ -2,9 +2,8 @@
 
 - caméra isometrique ou projection orthogonale OK
 - texture de la carte projetée sur le relief OK
+- capitales OK
 
-
-- capitales
 - attendre que la texture d3.js soit chargée
 - centroid basé sur la position des capitales
 - fonction de transition pour la caméra

@@ -17,6 +17,7 @@ var projection = d3.geo
 	//.orthographic();
 	.mercator();
 projection.scale(80);
+
 var path = d3.geo.path().projection(projection);
 
 
@@ -51,7 +52,7 @@ function ready(error, results)
 
 	pointsStructure = [];
 	paysIdPlace = [];
-	currentYear = 2013;
+	currentYear = 0;
 
 
 	ajoutDesPointsDuFormatDeLaCarte();
@@ -102,6 +103,58 @@ function animate()
 //////////// D3 ////////////////////////////
 ////////////////////////////////////////////
 
+
+function ajoutDesPointsDuFormatDeLaCarte()
+{
+
+	var HG = projection([-180,	84]);
+	var HD = projection([180,	84]);
+	var BD = projection([180,	-84]);
+	var BG = projection([-180,	-84]);
+	var MG = projection([-180,	0]);
+	var MD = projection([180,	0]);
+
+	pointsStructure.push({ x: HG[0], y: HG[1], z:0 });
+	pointsStructure.push({ x: HD[0], y: HD[1], z:0 });
+	pointsStructure.push({ x: MG[0], y: MG[1], z:0 });
+	pointsStructure.push({ x: MD[0], y: MD[1], z:0 });
+	pointsStructure.push({ x: BG[0], y: BG[1], z:0 });
+	pointsStructure.push({ x: BD[0], y: BD[1], z:0 });
+
+	// pointsStructure.push( [ HG[0] , HG[1] , 0 ]);
+	// pointsStructure.push( [ HD[0] , HD[1] , 0 ]);
+	// pointsStructure.push( [ MG[0] , MG[1] , 0 ]);
+	// pointsStructure.push( [ MD[0] , MD[1] , 0 ]);
+	// pointsStructure.push( [ BG[0] , BG[1] , 0 ]);
+	// pointsStructure.push( [ BD[0] , BD[1] , 0 ]);
+
+
+	var nbPointsParCote = 20;
+	for(var i = 1; i < nbPointsParCote-1; i++)
+	{
+		var pointLigneHaut = projection([map(i, 0, nbPointsParCote, -180, 180),	84]);
+		var pointLigneBas = projection([map(i, 0, nbPointsParCote, -180, 180),	-84]);
+		var pointLigneGauche = projection([ -180, map(i, 0, nbPointsParCote, -84, 84)]);
+		var pointLigneDroite = projection([ 180, map(i, 0, nbPointsParCote, -84, 84)]);
+
+		pointsStructure.push({ x: pointLigneHaut[0] , 	y:pointLigneHaut[1], z:0 });
+		pointsStructure.push({ x: pointLigneBas[0] , 	y:pointLigneBas[1], z:0 });
+		pointsStructure.push({ x: pointLigneGauche[0] , y:pointLigneGauche[1], z:0 });
+		pointsStructure.push({ x: pointLigneDroite[0] , y:pointLigneDroite[1], z:0 });
+
+		// pointsStructure.push([ pointLigneHaut[0], pointLigneHaut[1], 0 ]);
+		// pointsStructure.push([ pointLigneBas[0], pointLigneBas[1], 0 ]);
+		// pointsStructure.push([ pointLigneGauche[0], pointLigneGauche[1], 0 ]);
+		// pointsStructure.push([ pointLigneDroite[0], pointLigneDroite[1], 0 ]);
+	}
+}
+
+
+
+
+
+
+
 function dessinDeLaCarteTexture(results0, results1)
 {
 
@@ -141,12 +194,36 @@ function dessinDeLaCarteTexture(results0, results1)
 						.text("#"+results1[i].an2013+" / "+results1[i].name);
 					
 
+					// ajout des capitales
+					var latitude = results1[i].latitude;
+					var longitude = results1[i].longitude;
+
+					if(latitude != "#N/A" && longitude != "#N/A")
+					{
+						var lat = parseFloat(latitude.substring(0, latitude.length-1));
+						var sens = latitude.substring(latitude.length-1, latitude.length);
+						if(sens == "S"){ lat *= -1; }
+
+						var long = parseFloat(longitude.substring(0, longitude.length-1));
+						sens = longitude.substring(longitude.length-1, longitude.length);
+						if(sens == "W"){ long *= -1; }
+
+						coordonneesCapitale = [ long, lat ];
+						var traductionCoor = projection(coordonneesCapitale);
+						var x = traductionCoor[0];
+						var y = traductionCoor[1];
+						
+						pointsStructure.push({ x: x, y: y, z: -map(results1[i].an2013, 0, 180, 0, 40) });
+						//pointsStructure.push([ x, y, --map(results1[i].an2013, 0, 180, 0, 40) ]);
+						paysIdPlace.push([ d.id, cptId, [ parseInt(results1[i].an2013),  parseInt(results1[i].an2012)] ]);
+						cptId++;
+					}
+
 					// ajout des centroids
-					var centroidTemporaire = path.centroid(d);
-					var hauteur = map(results1[i].an2013, 0, 180, 0, 20);
-					pointsStructure.push({ x: centroidTemporaire[0], y: centroidTemporaire[1], z: -hauteur*1.4 });
-					paysIdPlace.push([ d.id, cptId, parseInt(results1[i].an2013) ]);
-					cptId++;
+					// var centroidTemporaire = path.centroid(d);
+					// pointsStructure.push({ x: centroidTemporaire[0], y: centroidTemporaire[1], z: -map(results1[i].an2013, 0, 180, 0, 40) });
+					// paysIdPlace.push([ d.id, cptId, parseInt(results1[i].an2013) ]);
+					// cptId++;
 
 				}
 			}
@@ -160,38 +237,6 @@ function dessinDeLaCarteTexture(results0, results1)
 
 
 
-function ajoutDesPointsDuFormatDeLaCarte()
-{
-	var HG = projection([-180,	84]);
-	var HD = projection([180,	84]);
-	var BD = projection([180,	-84]);
-	var BG = projection([-180,	-84]);
-	var MG = projection([-180,	0]);
-	var MD = projection([180,	0]);
-
-	pointsStructure.push({ x: HG[0], y: HG[1], z:0 });
-	pointsStructure.push({ x: HD[0], y: HD[1], z:0 });
-	pointsStructure.push({ x: MG[0], y: MG[1], z:0 });
-	pointsStructure.push({ x: MD[0], y: MD[1], z:0 });
-	pointsStructure.push({ x: BG[0], y: BG[1], z:0 });
-	pointsStructure.push({ x: BD[0], y: BD[1], z:0 });
-
-
-	var nbPointsParCote = 20;
-	for(var i = 1; i < nbPointsParCote-1; i++)
-	{
-		var pointLigneHaut = projection([map(i, 0, nbPointsParCote, -180, 180),	84]);
-		var pointLigneBas = projection([map(i, 0, nbPointsParCote, -180, 180),	-84]);
-		var pointLigneGauche = projection([ -180, map(i, 0, nbPointsParCote, -84, 84)]);
-		var pointLigneDroite = projection([ 180, map(i, 0, nbPointsParCote, -84, 84)]);
-
-		pointsStructure.push({ x: pointLigneHaut[0] , 	y:pointLigneHaut[1], z:0 });
-		pointsStructure.push({ x: pointLigneBas[0] , 	y:pointLigneBas[1], z:0 });
-		pointsStructure.push({ x: pointLigneGauche[0] , y:pointLigneGauche[1], z:0 });
-		pointsStructure.push({ x: pointLigneDroite[0] , y:pointLigneDroite[1], z:0 });
-	}
-}
-
 
 
 
@@ -200,7 +245,6 @@ function ajoutDesPointsDesFrontieresDesPays()
 
 	// lire le svg avec les nouveaux points
 	var obj = document.getElementById("object");
-	console.log(obj.contentDocument);
 	
 	var svg = obj.contentDocument;
 	
@@ -219,7 +263,7 @@ function ajoutDesPointsDesFrontieresDesPays()
 		{
 
 			var extraPoint = projection([ points[j], points[j+1] ]);
-			//pointsStructure.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });
+			pointsStructure.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });	
 
 		}
 		
@@ -253,6 +297,7 @@ function creationCanvasTexture()
 	//document.body.appendChild(canvas2d);
 
 	return canvas2d;
+
 }
 
 
@@ -290,8 +335,8 @@ var Dessin = function()
 
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
-	    	map: textureCarted3js,
-	    	//color:0xffee99,
+	    	//map: textureCarted3js,
+	    	color:0xffee99,
 	    	side: THREE.DoubleSide,
 	    	//wireframe: true, 
 	    	//wireframeLinewidth: 1
@@ -322,25 +367,30 @@ var Dessin = function()
 	    for (var i = 0; i < pointsStructure.length; i++ )
 	    {
 			geometrie.vertices.push({ x: pointsStructure[i].x, y: pointsStructure[i].y, z: pointsStructure[i].z });
+			//geometrie.vertices.push({ x: pointsStructure[i][0], y: pointsStructure[i][1], z: pointsStructure[i][2] });
 		}
 
 		var delaunay = triangulate(pointsStructure);
+		//var delaunay = d3.geom.delaunay(pointsStructure);
 
-
+		
 		for (var i=0; i < delaunay.length; i++ )
 		{
 			// trouver les ids des vertices de chaque triangles
 			var id_a, id_b, id_c;
-			for(var k=0; k < geometrie.vertices.length; k++ )
+			for(var k = 0; k < geometrie.vertices.length; k++ )
 			{
+				//if(delaunay[i][0][0] == geometrie.vertices[k].x && delaunay[i][0][1] == geometrie.vertices[k].y && delaunay[i][0][2] == geometrie.vertices[k].z)
 				if(delaunay[i].a.x == geometrie.vertices[k].x && delaunay[i].a.y == geometrie.vertices[k].y && delaunay[i].a.z == geometrie.vertices[k].z)
 				{
 					id_a = k;
 				}
+				//if(delaunay[i][1][0] == geometrie.vertices[k].x && delaunay[i][1][1] == geometrie.vertices[k].y && delaunay[i][1][2] == geometrie.vertices[k].z)
 				if(delaunay[i].b.x == geometrie.vertices[k].x && delaunay[i].b.y == geometrie.vertices[k].y && delaunay[i].b.z == geometrie.vertices[k].z)
 				{
 					id_b = k;
 				}
+				//if(delaunay[i][2][0] == geometrie.vertices[k].x && delaunay[i][2][1] == geometrie.vertices[k].y && delaunay[i][2][2] == geometrie.vertices[k].z)
 				if(delaunay[i].c.x == geometrie.vertices[k].x && delaunay[i].c.y == geometrie.vertices[k].y && delaunay[i].c.z == geometrie.vertices[k].z)
 				{
 					id_c = k;
@@ -361,7 +411,7 @@ var Dessin = function()
 	    this.mesh = new THREE.Mesh(geometrie, this.materialMesh);
 	    this.mesh.doubleSided = true;		
 	    scene.add(this.mesh);
-
+		
 		
 	}
 
@@ -390,7 +440,7 @@ var Dessin = function()
 
 		for(var i = 0; i < paysIdPlace.length; i++)
       	{
-			this.transition[i].setup( this.mesh.geometry.vertices[paysIdPlace[i][1]].z, getRandom(0, -60) );
+			this.transition[i].setup( this.mesh.geometry.vertices[paysIdPlace[i][1]].z, -map(paysIdPlace[i][2][currentYear], 0, 180, 0, 40 ));
 			this.transition[i].setTween(1);
 			this.transition[i].setSpeed(0.1);
 		}
@@ -457,8 +507,8 @@ var Canvas = function()
 
 		this.scene = new THREE.Scene();
 
-		//this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
-		this.camera = new THREE.OrthographicCamera( this.largeurFenetre / - 2, this.largeurFenetre / 2, this.hauteurFenetre / 2, this.hauteurFenetre / - 2, 1, 10000 );
+		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
+		//this.camera = new THREE.OrthographicCamera( this.largeurFenetre / - 2, this.largeurFenetre / 2, this.hauteurFenetre / 2, this.hauteurFenetre / - 2, 1, 10000 );
 		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -600);
 		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
 		this.camera.up = new THREE.Vector3(0, 0, -1);
@@ -499,12 +549,12 @@ var Canvas = function()
 	this.onMouseMove = function(event)
 	{
 		this.xSouris = event.clientX;
+		var ySouris = event.clientY;
 
-		this.positionCamera();
-		//this.camera.position.x = map(this.xSouris, 0, window.innerWidth, -1000, 1000);
-		//this.spot2.position.x = map(event.clientY, 0, window.innerHeight, -1000, 1000);
-		//this.camera.position.z = map(xSouris, 0, window.innerWidth, -1000, 1000);
-		//this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+		//this.positionCamera();
+		this.camera.position.x = map(this.xSouris, 0, window.innerWidth, 0, 1000);
+		this.camera.position.z = map(ySouris, 0, window.innerHeight, -1000, 1000);
+		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
 		return false;
 	}
 
@@ -563,9 +613,19 @@ var Canvas = function()
 function changerAnnee()
 {
 
-	queue()
-		.defer(lireCsv, "index.csv")
-		.awaitAll(readyChangementAnnee);
+	// queue()
+	// 	.defer(lireCsv, "index.csv")
+	// 	.awaitAll(readyChangementAnnee);
+
+
+	if(currentYear < 1)
+	{
+		currentYear++;
+	} else {
+		currentYear = 0;
+	}
+
+	dessin.changementAnnee();
 
 }
 
@@ -575,7 +635,7 @@ function changerAnnee()
 function readyChangementAnnee(errors, results)
 {
 
-
+	/*
 	for(var i = 0; i < results[0].length; i++)
 	{
 		var iso = results[0][i].iso;
@@ -584,16 +644,14 @@ function readyChangementAnnee(errors, results)
 		//item.style("top", (results[0][i].an2012*20)+"px");
 		
 	}
-
-	
-
+	*/
 
 	// d3.selectAll(".itemPays").data().enter()
 	// data(item)
 
 	
 
-	dessin.changementAnnee();
+	
 
 
 }
