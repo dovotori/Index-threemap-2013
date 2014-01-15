@@ -70,7 +70,7 @@ Guinée-Bissau,Guinea-Bissau,92,75,GNB,Bissau,11.45N,15.45W
 Guyana,Guyana,69,58,GUY,Georgetown,06.50N,58.12W
 Haïti,Haiti,49,52,HTI,Port-au-Prince,18.40N,72.20W
 Honduras,Honduras,127,135,HND,Tegucigalpa,14.05N,87.14W
-Hong-Kong,Hong Kong,58,54,HKG,#N/A,#N/A,#N/A
+Hong-Kong,Hong Kong,58,54,HKG,#N/A,22.15N,114.10E
 Hongrie,Hungary,56,40,HUN,Budapest,47.29N,19.05E
 Inde,India,140,131,IND,New Delhi,28.37N,77.13E
 Indonésie,Indonesia,139,146,IDN,Jakarta,06.09S,106.49E
@@ -124,7 +124,7 @@ Oman,Oman,141,117,OMN,Masqat,23.37N,58.36E
 Ouganda,Uganda,104,139,UGA,Kampala,00.20N,32.30E
 Ouzbékistan,Uzbekistan,164,157,UZB,Tashkent,41.20N,69.10E
 Pakistan,Pakistan,159,151,PAK,Islamabad,33.40N,73.10E
-Palestine,Occupied Palestinian Territory,146,153,PSE,#N/A,#N/A,#N/A
+Palestine,Palestine,146,153,PSE,Jerusalem,31.54N,35.12E
 Panama,Panama,111,113,PAN,Panama,09.00N,79.25W
 Papouasie-Nouvelle-Guinée,Papua New Guinea,41,35,PNG,Port Moresby,09.24S,147.08E
 Paraguay,Paraguay,91,80,PRY,Asuncion,25.10S,57.30W
@@ -161,7 +161,7 @@ Surinam,Suriname,31,22,SUR,Paramaribo,05.50N,55.10W
 Swaziland,Swaziland,155,144,SWZ,Mbabane,26.18S,31.06E
 Syrie,Syrian Arab Republic,176,176,SYR,Damas,33.3132N,36.1852E
 Tadjikistan,Tajikistan,123,122,TJK,Dushanbe,38.33N,68.48E
-Taïwan,Taiwan,47,45,TWN,#N/A,#N/A,#N/A
+Taïwan,Taiwan,47,45,TWN,#N/A,23.28N,121E
 Tanzanie,United Republic Of Tanzania,70,34,TZA,Dodoma,6.11N,35.445E
 Tchad,Chad,121,103,TCD,N'Djamena,12.10N,14.59E
 Thailande,Thailand,135,137,THA,Bangkok,13.45N,100.35E

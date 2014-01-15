@@ -71,8 +71,12 @@ function ready(error, results)
 	
 	dessin = new Dessin();
 	dessin.setup(canvas.scene, textureCarted3js);
-	
-	document.addEventListener("click", changerAnnee, false);
+
+	var btn_suivant = document.getElementById("btn_suivant");
+	var btn_precedent = document.getElementById("btn_precedent");
+	btn_suivant.addEventListener("click", function(){ changerAnnee(-1); }, false);
+	btn_precedent.addEventListener("click", function(){ changerAnnee(1); }, false);
+
 
 	animate();
 
@@ -167,7 +171,7 @@ function dessinDeLaCarteTexture(results0, results1)
 	var svg = d3.select("#conteneur").append("svg")
 		.attr("width", width)
 	    .attr("height", height)
-	    .style("background-color", "#000")
+	    .style("background-color", "#555")
 	    .attr("id","svg");
 
 
@@ -194,7 +198,8 @@ function dessinDeLaCarteTexture(results0, results1)
 						.style("position", "absolute")
 						.style("top", (results1[i].an2013*20)+"px")
 						.attr("id", results1[i].iso)
-						.text("#"+results1[i].an2013+" / "+results1[i].name);
+						.text(results1[i].name)
+						.on("click", function(d){ console.log(d); });
 					
 
 					// ajout des capitales
@@ -387,8 +392,8 @@ var Dessin = function()
 
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
-	    	//map: textureCarted3js,
-	    	color:0xffee99,
+	    	map: textureCarted3js,
+	    	//color:0xffee99,
 	    	side: THREE.DoubleSide,
 	    	//wireframe: true, 
 	    	//wireframeLinewidth: 1
@@ -466,12 +471,12 @@ var Dessin = function()
 
 		geometrie.computeFaceNormals();
 
-	     this.mesh = new THREE.Mesh(geometrie, this.materialMesh);
-	    // this.mesh.doubleSided = true;		
-	    // scene.add(this.mesh);
+	    this.mesh = new THREE.Mesh(geometrie, this.materialMesh);
+	    this.mesh.doubleSided = true;		
+	    scene.add(this.mesh);
 		
-	    var particleSystem = new THREE.ParticleSystem( geometrie, this.materialParticule );
- 		scene.add(particleSystem);
+	  	// var particleSystem = new THREE.ParticleSystem( geometrie, this.materialParticule );
+ 		// scene.add(particleSystem);
 
 		this.drawLines(scene);
 	}
@@ -581,7 +586,7 @@ var Canvas = function()
 
 		this.scrollSouris = 100;
 		this.centreCarte = projection([0,0]);
-		this.positionInitCam = projection([0,-89]);
+		this.positionInitCam = projection([ 0, -89 ]);
 		this.largeurFenetre = 1200;
 		this.hauteurFenetre = 800;
 
@@ -656,7 +661,7 @@ var Canvas = function()
 	this.positionCamera = function()
 	{
 
-		var coordonneesCamera = []
+		var coordonneesCamera = [];
 		var angleMax = 180;
 		var angleOrbiteCamera, rayonOrbiteCamera;
 		var rayonMin = 100;
@@ -673,10 +678,16 @@ var Canvas = function()
 		this.camera.position.y = coordonneesCamera[1];
 		this.camera.lookAt( new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100) );
 
+	}	
+
+
+
+	this.moveCam = function(iso)
+	{
+
+		//alert(iso);
+
 	}
-
-
-	
 
 	
 }
@@ -691,18 +702,30 @@ var Canvas = function()
 ///////////// CHANGER ANNEE /////////
 ////////////////////////////////////
 
-function changerAnnee()
+function changerAnnee(sens)
 {
 
-
-
-
-	if(currentYear < 1)
+	if(sens > 0 && currentYear < 1)
 	{
 		currentYear++;
-	} else {
-		currentYear = 0;
+	} else if(sens < 0 && currentYear >= 1){
+		currentYear--;
 	}
+
+
+	var displayYear = document.getElementById("current_year");
+	displayYear.innerHTML = 2013-currentYear;
+
+
+	// reclasser liste
+	var classement = d3.select("#classement");
+	for(var i = 0; i < paysIdPlace.length; i++)
+	{
+		classement.select("#"+paysIdPlace[i][0]).transition().duration(700).style("top", (paysIdPlace[i][2][currentYear]*20)+"px");
+	}
+
+
+
 
 	dessin.changementAnnee();
 
