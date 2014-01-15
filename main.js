@@ -22,7 +22,7 @@ var path = d3.geo.path().projection(projection);
 
 
 var pointsStructure;
-var paysIdPlace;
+var infosPays;
 var currentYear;
 var hauteurMax;
 
@@ -52,7 +52,7 @@ function ready(error, results)
 {
 
 	pointsStructure = [];
-	paysIdPlace = [];
+	infosPays = [];	// [ iso,idForme, [classementAnnee], [centroid] ] 
 	currentYear = 0;
 	hauteurMax = 16;
 
@@ -60,6 +60,8 @@ function ready(error, results)
 	ajoutDesPointsDuFormatDeLaCarte();
 	ajoutDesPointsDesFrontieresDesPays();
 	dessinDeLaCarteTexture(results[0], results[1]);
+
+
 
 	// creation de la texture THREE
 	var textureCarted3js = new THREE.Texture( creationCanvasTexture() );
@@ -171,7 +173,7 @@ function dessinDeLaCarteTexture(results0, results1)
 	var svg = d3.select("#conteneur").append("svg")
 		.attr("width", width)
 	    .attr("height", height)
-	    .style("background-color", "#555")
+	    .style("background-color", "#fff")
 	    .attr("id","svg");
 
 
@@ -199,7 +201,7 @@ function dessinDeLaCarteTexture(results0, results1)
 						.style("top", (results1[i].an2013*20)+"px")
 						.attr("id", results1[i].iso)
 						.text(results1[i].name)
-						.on("click", function(d){ console.log(d); });
+						.on("click", function(){ canvas.moveCamToPays(this.id); });
 					
 
 					// ajout des capitales
@@ -223,14 +225,15 @@ function dessinDeLaCarteTexture(results0, results1)
 						
 						pointsStructure.push({ x: x, y: y, z: -map(results1[i].an2013, 0, 180, 0, hauteurMax) });
 						//pointsStructure.push([ x, y, --map(results1[i].an2013, 0, 180, 0, 40) ]);
-						paysIdPlace.push([ d.id, cptId, [ parseInt(results1[i].an2013),  parseInt(results1[i].an2012)] ]);
+						infosPays.push([ d.id, cptId, [ parseInt(results1[i].an2013),  parseInt(results1[i].an2012)], 
+							[ x, y ] ]);
 						cptId++;
 					}
 
 					// ajout des centroids
 					// var centroidTemporaire = path.centroid(d);
 					// pointsStructure.push({ x: centroidTemporaire[0], y: centroidTemporaire[1], z: -map(results1[i].an2013, 0, 180, 0, 40) });
-					// paysIdPlace.push([ d.id, cptId, parseInt(results1[i].an2013) ]);
+					// infosPays.push([ d.id, cptId, parseInt(results1[i].an2013) ]);
 					// cptId++;
 
 				}
@@ -240,6 +243,7 @@ function dessinDeLaCarteTexture(results0, results1)
 
 		
 }
+
 
 
 
@@ -378,6 +382,7 @@ var Dessin = function()
 	this.materialMesh;
 	this.materialParticule;
 	this.materialLine;
+	this.materialShader;
 
 	this.mesh;
 	this.transition;
@@ -411,10 +416,27 @@ var Dessin = function()
     		opacity: 0.3
     	});
 
+    	/*
+    	var uniforms = {
+			"resolution":{ type:'v2',value:new THREE.Vector2(0,0)},
+			"noise":{ type:'f',value:.04}
+		};
+
+    	this.materialShader = new THREE.ShaderMaterial({
+		  uniforms: uniforms,
+		  //attributes: attributes,
+		  vertexShader: document.getElementById('vertexShader').textContent,
+		  fragmentShader: document.getElementById('fragmentShader').textContent
+		});
+		*/
+
+
+
+
 
 
 	    // TRANSITION
-	    for(var i =0; i < paysIdPlace.length; i++)
+	    for(var i =0; i < infosPays.length; i++)
 	    {
 	    	this.transition[i] = new Transition();
 	    }
@@ -485,12 +507,12 @@ var Dessin = function()
 
 	this.drawLines = function(scene)
 	{
-		for(var i = 0; i < paysIdPlace.length; i++)
+		for(var i = 0; i < infosPays.length; i++)
       	{
 			var geometrie = new THREE.Geometry();
-			geometrie.vertices.push(new THREE.Vector3(this.mesh.geometry.vertices[paysIdPlace[i][1]].x, this.mesh.geometry.vertices[paysIdPlace[i][1]].y, this.mesh.geometry.vertices[paysIdPlace[i][1]].z));
-			geometrie.vertices.push(new THREE.Vector3(this.mesh.geometry.vertices[paysIdPlace[i][1]].x, this.mesh.geometry.vertices[paysIdPlace[i][1]].y, (this.mesh.geometry.vertices[paysIdPlace[i][1]].z*40)-50));
-			geometrie.vertices.push(new THREE.Vector3(0, this.mesh.geometry.vertices[paysIdPlace[i][1]].y, (this.mesh.geometry.vertices[paysIdPlace[i][1]].z*40)-50));
+			geometrie.vertices.push(new THREE.Vector3(this.mesh.geometry.vertices[infosPays[i][1]].x, this.mesh.geometry.vertices[infosPays[i][1]].y, this.mesh.geometry.vertices[infosPays[i][1]].z));
+			geometrie.vertices.push(new THREE.Vector3(this.mesh.geometry.vertices[infosPays[i][1]].x, this.mesh.geometry.vertices[infosPays[i][1]].y, (this.mesh.geometry.vertices[infosPays[i][1]].z*40)-50));
+			geometrie.vertices.push(new THREE.Vector3(0, this.mesh.geometry.vertices[infosPays[i][1]].y, (this.mesh.geometry.vertices[infosPays[i][1]].z*40)-50));
 			this.lines[i] = new THREE.Line(geometrie, this.materialLine);
 			scene.add(this.lines[i]);
 		}
@@ -503,9 +525,9 @@ var Dessin = function()
 
 		if(!this.transition[0].isFinished)
       	{
-      		for(var i = 0; i < paysIdPlace.length; i++)
+      		for(var i = 0; i < infosPays.length; i++)
       		{
-				this.mesh.geometry.vertices[paysIdPlace[i][1]].z = this.transition[i].execute();
+				this.mesh.geometry.vertices[infosPays[i][1]].z = this.transition[i].execute();
 
 			}
 			this.mesh.geometry.verticesNeedUpdate = true;
@@ -522,10 +544,10 @@ var Dessin = function()
 	this.changementAnnee = function(scene)
 	{
 
-		for(var i = 0; i < paysIdPlace.length; i++)
+		for(var i = 0; i < infosPays.length; i++)
       	{
       		//this.lines[i].
-			this.transition[i].setup( this.mesh.geometry.vertices[paysIdPlace[i][1]].z, -map(paysIdPlace[i][2][currentYear], 0, 180, 0, hauteurMax ));
+			this.transition[i].setup( this.mesh.geometry.vertices[infosPays[i][1]].z, -map(infosPays[i][2][currentYear], 0, 180, 0, hauteurMax ));
 			this.transition[i].setTween(1);
 			this.transition[i].setSpeed(0.1);
 		}
@@ -620,7 +642,7 @@ var Canvas = function()
 		
 		var clone = this;
 		document.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
-		document.addEventListener("mousewheel", function(event){ clone.onMouseScroll(event); }, false);
+		//document.addEventListener("mousewheel", function(event){ clone.onMouseScroll(event); }, false);
 		//document.addEventListener("DOMMouseScroll", function(event){ clone.onMouseScroll(event); }, false);
 
 	}
@@ -682,10 +704,19 @@ var Canvas = function()
 
 
 
-	this.moveCam = function(iso)
+	this.moveCamToPays = function(iso)
 	{
 
-		//alert(iso);
+		for(var i = 0; i < infosPays.length; i++)
+		{
+			if(iso == infosPays[i][0])
+			{
+				this.camera.position.x = infosPays[i][3][0];
+				this.camera.position.y = infosPays[i][3][1]-50;
+				this.camera.position.z = -50;
+				this.camera.lookAt(new THREE.Vector3(infosPays[i][3][0], infosPays[i][3][1], -10));
+			}
+		}
 
 	}
 
@@ -719,9 +750,9 @@ function changerAnnee(sens)
 
 	// reclasser liste
 	var classement = d3.select("#classement");
-	for(var i = 0; i < paysIdPlace.length; i++)
+	for(var i = 0; i < infosPays.length; i++)
 	{
-		classement.select("#"+paysIdPlace[i][0]).transition().duration(700).style("top", (paysIdPlace[i][2][currentYear]*20)+"px");
+		classement.select("#"+infosPays[i][0]).transition().duration(700).style("top", (infosPays[i][2][currentYear]*20)+"px");
 	}
 
 
