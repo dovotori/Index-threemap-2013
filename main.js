@@ -81,7 +81,6 @@ function ready(error, results)
 
 
 	animate();
-
 	
 }
 
@@ -170,15 +169,15 @@ function dessinDeLaCarteTexture(results0, results1)
 
 
 	// dessin de la carte avec d3
-	var svg = d3.select("#conteneur").append("svg")
+	var carted3js = d3.select("#conteneur").append("svg")
 		.attr("width", width)
 	    .attr("height", height)
-	    .style("background-color", "#fff")
-	    .attr("id","svg");
+	    .style("background-color", "#555")
+	    .attr("id","carted3js");
 
 
-	var carted3js = svg.attr("id", "carted3js");
-	carted3js.selectAll("path").data(results0.features).enter()
+	carted3js.selectAll("path")
+		.data(results0.features).enter()
 		.append("svg:path")
 		.attr("id", function(d){ return d.id; })
 		.attr("d", path)
@@ -397,8 +396,8 @@ var Dessin = function()
 
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
-	    	map: textureCarted3js,
-	    	//color:0xffee99,
+	    	//map: textureCarted3js,
+	    	color:0xffee99,
 	    	side: THREE.DoubleSide,
 	    	//wireframe: true, 
 	    	//wireframeLinewidth: 1
@@ -416,11 +415,18 @@ var Dessin = function()
     		opacity: 0.3
     	});
 
-    	/*
+		var uniforms = {
+			"tDiffuse":  { type: "t", value: null },
+			"exposure":  { type: "f", value: 1.5 },
+			"brightMax": { type: "f", value: 0.5 }
+		}
+
+		/*
     	var uniforms = {
 			"resolution":{ type:'v2',value:new THREE.Vector2(0,0)},
 			"noise":{ type:'f',value:.04}
 		};
+		*/
 
     	this.materialShader = new THREE.ShaderMaterial({
 		  uniforms: uniforms,
@@ -428,7 +434,7 @@ var Dessin = function()
 		  vertexShader: document.getElementById('vertexShader').textContent,
 		  fragmentShader: document.getElementById('fragmentShader').textContent
 		});
-		*/
+		
 
 
 
@@ -500,7 +506,7 @@ var Dessin = function()
 	  	// var particleSystem = new THREE.ParticleSystem( geometrie, this.materialParticule );
  		// scene.add(particleSystem);
 
-		this.drawLines(scene);
+		//this.drawLines(scene);
 	}
 
 
@@ -583,18 +589,21 @@ var Dessin = function()
 var Canvas = function()
 {
 
-	this.camera;
 	this.renderer;
 	this.scene;
 	this.centreCarte;
 	this.positionInitCam;
-	this.xSouris;
-	this.scrollSouris;
-	this.spot1;
-	this.spot2;
-	this.largeurFenetre; 
-	this.hauteurFenetre;
 
+	this.xSouris; this.scrollSouris;
+	
+	this.spot1; this.spot2;
+	this.repereCube;
+
+	this.focusCamera;
+	this.angleSpot;
+
+	this.camera;
+	this.transitionCamera;
 
 
 	this.setup = function(WIDTH, HEIGHT)
@@ -611,17 +620,23 @@ var Canvas = function()
 		this.positionInitCam = projection([ 0, -89 ]);
 		this.largeurFenetre = 1200;
 		this.hauteurFenetre = 800;
+		this.angleSpot = 0;
 
+		// SCENE
 		this.scene = new THREE.Scene();
 		this.scene.fog = new THREE.Fog( 0x000000, 1, FAR/8 );
 
+		// CAMERA
+		this.transitionCamera = new Transition();
+		this.focusCamera = [this.centreCarte[0], this.centreCarte[1], -100];
 		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
 		//this.camera = new THREE.OrthographicCamera( this.largeurFenetre / - 2, this.largeurFenetre / 2, this.hauteurFenetre / 2, this.hauteurFenetre / - 2, 1, 10000 );
-		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -600);
-		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -400);
+		this.camera.lookAt(new THREE.Vector3(this.focusCamera[0], this.focusCamera[1], this.focusCamera[2]));
 		this.camera.up = new THREE.Vector3(0, 0, -1);
 		this.scene.add(this.camera);
 	
+		// RENDERER
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(WIDTH, HEIGHT);
 		this.renderer.setClearColor("#ffffff", 1);
@@ -637,6 +652,13 @@ var Canvas = function()
 		this.spot2.position.set( 200, 0, -200 );
 		this.scene.add(this.spot2);
 
+		this.repereCube = new THREE.Mesh(new THREE.CubeGeometry(10, 10, 10), new THREE.MeshNormalMaterial({ color: 0xff0000 }));
+    	this.repereCube.overdraw = true;
+    	this.repereCube.position.set(this.spot1.position.x, this.spot1.position.y, this.spot1.position.z);
+    	this.scene.add(this.repereCube);
+
+
+
 
 		document.body.appendChild(this.renderer.domElement);
 		
@@ -650,25 +672,35 @@ var Canvas = function()
 	
 	this.draw = function()
 	{
-		this.renderer.render(this.scene, this.camera);	
+		//this.positionSpot();
+
+		if(!this.transitionCamera.isFinished)
+		{
+
+			var currentPos = this.transitionCamera.execute3d();
+			console.log(currentPos[0]+" "+currentPos[1]+" "+currentPos[2]);
+			this.camera.position.x = currentPos[0];
+			this.camera.position.y = currentPos[1];
+			this.camera.position.z = currentPos[3];
+		}
+		this.camera.lookAt(new THREE.Vector3(this.focusCamera[0], this.focusCamera[1], this.focusCamera[2]));
+
+		this.renderer.render(this.scene, this.camera);
+
 	}
 	
 	
 	this.onMouseMove = function(event)
 	{
 		this.xSouris = event.clientX;
-		var ySouris = event.clientY;
-
-		//this.positionCamera();
-		this.camera.position.x = map(this.xSouris, 0, window.innerWidth, 0, 1000);
-		this.camera.position.z = map(ySouris, 0, window.innerHeight, -1000, 1000);
-		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+		this.positionCamera();
 		return false;
 	}
 
+
+
 	this.onMouseScroll = function(e) {
 
-	    // cross-browser wheel delta
 	    var e = window.event || e;
 	    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 	    this.scrollSouris += delta;
@@ -680,27 +712,52 @@ var Canvas = function()
 	
 	}
 
+
+
+
 	this.positionCamera = function()
 	{
 
-		var coordonneesCamera = [];
-		var angleMax = 180;
-		var angleOrbiteCamera, rayonOrbiteCamera;
-		var rayonMin = 100;
-		var rayonMax = projection([180,0]);
-			rayonMax = rayonMax[1];
+		var rayon = projection([180,0])[1];
+		var centre = this.focusCamera;
+		var angle = map(this.xSouris, 0, largeurFenetre, 0, 180);
 
-		angleOrbiteCamera =  angleMax * this.xSouris / largeurFenetre;
-
-		// calcul du rayon de l'orbite de la caméra
-		rayonOrbiteCamera = this.positionInitCam[1]*this.scrollSouris/100
-		coordonneesCamera = [Math.cos(angleOrbiteCamera*(Math.PI/180))*rayonOrbiteCamera, Math.sin(angleOrbiteCamera*(Math.PI/180))*rayonOrbiteCamera] ;
+		var x = (Math.cos(angle*(Math.PI/180)) * rayon) + centre[0];
+		var y = (Math.sin(angle*(Math.PI/180)) * rayon) + centre[1];
 		
-		this.camera.position.x = coordonneesCamera[0]+this.positionInitCam[0];
-		this.camera.position.y = coordonneesCamera[1];
-		this.camera.lookAt( new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100) );
+		this.camera.position.x = x;
+		this.camera.position.y = y;
+		this.camera.lookAt( new THREE.Vector3(this.focusCamera[0], this.focusCamera[1], this.focusCamera[2]) );
 
-	}	
+
+		// lumiere opposée par rapport a la camera
+		x = (Math.cos((angle+180)*(Math.PI/180)) * rayon) + centre[0];
+		y = (Math.sin((angle+180)*(Math.PI/180)) * rayon) + centre[1];
+		this.spot2.position.x = x;
+		this.spot2.position.y = y;
+		this.repereCube.position.x = x;
+		this.repereCube.position.y = y;
+		this.repereCube.position.z = 0;
+
+	}
+
+
+
+
+	this.positionSpot = function()
+	{
+		this.angleSpot++;
+		var rayon = 1000;
+		var centre = this.centreCarte;
+
+		var x = (Math.cos(this.angleSpot*(Math.PI/180)) * rayon)+centre[0];
+		var y = (Math.sin(this.angleSpot*(Math.PI/180)) * rayon)+centre[1];
+
+		this.repereCube.position.x = x;
+		this.spot2.position.x = x;
+		this.repereCube.position.y = y;
+		this.spot2.position.y = y;
+	}
 
 
 
@@ -712,9 +769,14 @@ var Canvas = function()
 			if(iso == infosPays[i][0])
 			{
 				this.camera.position.x = infosPays[i][3][0];
-				this.camera.position.y = infosPays[i][3][1]-50;
-				this.camera.position.z = -50;
-				this.camera.lookAt(new THREE.Vector3(infosPays[i][3][0], infosPays[i][3][1], -10));
+				this.camera.position.y = infosPays[i][3][1]+100;
+				this.camera.position.z = -200;
+
+				this.focusCamera = [ infosPays[i][3][0], infosPays[i][3][1], -10 ];
+				//console.log(this.camera.position.x+" / "+this.camera.position.y+" / "+this.camera.position.z);
+				//this.transitionCamera.setup([this.camera.position.x,this.camera.position.y,this.camera.position.z], [ infosPays[i][3][0], infosPays[i][3][1]+100, -200 ]);
+				
+
 			}
 		}
 
@@ -752,11 +814,10 @@ function changerAnnee(sens)
 	var classement = d3.select("#classement");
 	for(var i = 0; i < infosPays.length; i++)
 	{
-		classement.select("#"+infosPays[i][0]).transition().duration(700).style("top", (infosPays[i][2][currentYear]*20)+"px");
+		classement.select("#"+infosPays[i][0])
+			.transition().duration(700)
+			.style("top", (infosPays[i][2][currentYear]*20)+"px");
 	}
-
-
-
 
 	dessin.changementAnnee();
 

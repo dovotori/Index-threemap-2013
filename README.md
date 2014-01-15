@@ -30,6 +30,6 @@ Pays manquants sur la carte
 
 
 A tester
-- lumiere opposée à la camera
-- profondeur de champs
+- lumiere opposée à la camera OK
+- profondeur de champs (ça à l'air chaud)
 - traits

@@ -40,6 +40,21 @@
 		-->
 
 
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec2 vUv;
+
+			void main() {
+
+				vUv  = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+			}
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentShader">
+		</script>
+		
+
 
 		<object type="image/svg+xml" data="svg/frontieres3.svg" id="object"></object>
 		<div id="conteneur"></div>

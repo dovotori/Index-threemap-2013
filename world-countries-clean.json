@@ -178,14 +178,14 @@
 {"type":"Feature","properties":{"name":"Maldives"},"geometry":{"type":"Polygon","coordinates":[[[73,3],[73,4],[74,4],[74,3],[73,3]]]},"id":"MDV"},
 {"type":"Feature","properties":{"name":"Tonga"},"geometry":{"type":"Polygon","coordinates":[[[-175,-21],[-175,-22],[-176,-22],[-176,-21],[-175,-21]]]},"id":"TON"},
 {"type":"Feature","properties":{"name":"Samoa"},"geometry":{"type":"Polygon","coordinates":[[[-172,-13],[-172,-14],[-173,-14],[-173,-13],[-172,-13]]]},"id":"WSM"},
-{"type":"Feature","properties":{"name":"Cape Verde"},"geometry":{"type":"Polygon","coordinates":[[[-23.34,15.02],[-23.34,16.02],[-24.34,16.02],[-24.34,15.02],[-23.34,15.02]]]},"id":"CPV"},
-{"type":"Feature","properties":{"name":"OECS"},"geometry":{"type":"Polygon","coordinates":[[[-61.48,17.20],[-61.48,18.20],[-62.48,18.20],[-62.48,17.20],[-61.48,17.20]]]},"id":"ATG"},
+{"type":"Feature","properties":{"name":"Cape Verde"},"geometry":{"type":"Polygon","coordinates":[[[-23.34,15.02],[-23.34,16.02],[-22.34,16.02],[-22.34,15.02],[-23.34,15.02]]]},"id":"CPV"},
+{"type":"Feature","properties":{"name":"OECS"},"geometry":{"type":"Polygon","coordinates":[[[-61.48,17.20],[-61.48,18.20],[-60.48,18.20],[-60.48,17.20],[-61.48,17.20]]]},"id":"ATG"},
 {"type":"Feature","properties":{"name":"Malta"},"geometry":{"type":"Polygon","coordinates":[[[14.31,35.54],[14.31,36.54],[15.31,36.54],[15.31,35.54],[14.31,35.54]]]},"id":"MLT"},
 {"type":"Feature","properties":{"name":"Comoros"},"geometry":{"type":"Polygon","coordinates":[[[43.16,11.41],[43.16,12.41],[44.16,12.41],[44.16,11.41],[43.16,11.41]]]},"id":"COM"},
 {"type":"Feature","properties":{"name":"Hong-Kong"},"geometry":{"type":"Polygon","coordinates":[[[114.10,22.15],[114.10,23.15],[115.10,23.15],[115.10,22.15],[114.10,22.15]]]},"id":"HKG"},
-{"type":"Feature","properties":{"name":"Maurice"},"geometry":{"type":"Polygon","coordinates":[[[57.3036,-20.936],[57.3036,-21.936],[58.3036,-21.936],[58.3036,-20.936],[57.3036,-20.936]]]},"id":"MUS"},
+{"type":"Feature","properties":{"name":"Maurice"},"geometry":{"type":"Polygon","coordinates":[[[57.3036,-20.936],[57.3036,-19.936],[58.3036,-19.936],[58.3036,-20.936],[57.3036,-20.936]]]},"id":"MUS"},
 {"type":"Feature","properties":{"name":"Kosovo"},"geometry":{"type":"Polygon","coordinates":[[[21.10,42.40],[21.10,43.40],[22.10,43.40],[22.10,42.40],[21.10,42.40]]]},"id":"RKS"},
-{"type":"Feature","properties":{"name":"Seychelles"},"geometry":{"type":"Polygon","coordinates":[[[55.27,-4.37],[55.27,-5.37],[56.27,-5.37],[56.27,-4.37],[55.27,-4.37]]]},"id":"SYC"},
+{"type":"Feature","properties":{"name":"Seychelles"},"geometry":{"type":"Polygon","coordinates":[[[55.27,-4.37],[55.27,-3.37],[56.27,-3.37],[56.27,-4.37],[55.27,-4.37]]]},"id":"SYC"},
 {"type":"Feature","properties":{"name":"Singapore"},"geometry":{"type":"Polygon","coordinates":[[[103.51,1.17],[103.51,2.17],[104.51,2.17],[104.51,1.17],[103.51,1.17]]]},"id":"SGP"},
 {"type":"Feature","properties":{"name":"Bahrain"},"geometry":{"type":"Polygon","coordinates":[[[50.30,26.10],[50.30,27.10],[51.30,27.10],[51.30,26.10],[50.30,26.10]]]},"id":"BHR"}
 ]}
