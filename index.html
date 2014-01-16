@@ -18,42 +18,68 @@
 	
 	<body>
 
-		<!--
-		<script type="x-shader/x-vertex" id="vertexShader">
-			varying vec3 vNormal;
-			void main() {
-				vNormal = normal;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-			}
-		</script>
-
-		<script type="x-shader/x-fragment" id="fragmentShader">
-		varying vec3 vNormal;
-		void main() {
-			vec3 light = vec3(0.5, 0.2, -10.0);
-			light = normalize(light);
-			float dProd = max(0.0, dot(vNormal, light));
-
-  			gl_FragColor = vec4(dProd,  dProd,  dProd,  1.0); 
-		}
-		</script>
-		-->
-
+		
 
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec2 vUv;
+			uniform float delta;
+			uniform float scale;
+			uniform float alpha;
+			varying vec3 vNormal;
 
-			void main() {
+			void main()
+			{
+				vNormal = normal;
+			    vUv = uv;
 
-				vUv  = uv;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			    // mouvement
+			    vec3 p = position;
+			    p.z += sin(2.0 * p.y + delta) * 5.0;
+			    p.z += cos(2.0 * p.z + delta / 2.0) * 5.0;
+			    p.z += cos(2.0 * p.x + delta) * 5.0;
+			    p.x += sin(p.y + delta / 2.0) * 10.0;
 
+			    gl_Position = projectionMatrix * modelViewMatrix * vec4(scale * p, 1.0 );
+			    //gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 			}
 		</script>
 
 		<script type="x-shader/x-fragment" id="fragmentShader">
+			#ifdef GL_ES
+			precision highp float;
+			#endif
+			uniform float delta;
+			uniform float alpha;
+
+			varying vec2 vUv;
+			varying vec3 vNormal;
+
+			uniform sampler2D texture;
+
+			void main(void)
+			{
+				// texture
+				vec4 texColor = texture2D( texture, vUv );
+
+				// normal
+				vec3 light = vec3(0.5, 0.2, -10.0);
+				light = normalize(light);
+				float dProd = max(0.0, dot(vNormal, light));
+
+				// couleur changeante
+			    vec2 position = vUv;
+			    float red = 1.0;
+			    float green = 0.25 + sin(delta) * 0.25;
+			    float blue = 0.0;
+			    vec3 rgb = vec3(red, green, blue);
+
+			    // rendu
+			    //vec4 color = vec4(rgb * dProd, alpha);
+			    gl_FragColor = vec4(texColor.x*dProd*rgb.x, texColor.y*dProd*rgb.y, texColor.z*dProd*rgb.z, alpha);
+			}
 		</script>
-		
+
+
 
 
 		<object type="image/svg+xml" data="svg/frontieres3.svg" id="object"></object>

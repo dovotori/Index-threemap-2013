@@ -387,6 +387,8 @@ var Dessin = function()
 	this.transition;
 	this.lines;
 
+	this.uniforms;
+
 
 
 	this.setup = function(scene, textureCarted3js)
@@ -394,51 +396,8 @@ var Dessin = function()
 		this.transition = [];
 		this.lines = [];
 
-		//MATERIAL
-		this.materialMesh = new THREE.MeshLambertMaterial({ 
-	    	//map: textureCarted3js,
-	    	color:0xffee99,
-	    	side: THREE.DoubleSide,
-	    	//wireframe: true, 
-	    	//wireframeLinewidth: 1
-	    	//morphTargets: true
-	    });
 
-	    this.materialParticule = new THREE.ParticleBasicMaterial({
-      		color: 0xFF0000,
-      		size: 4
-    	});
-
-    	this.materialLine = new THREE.LineBasicMaterial({ 
-    		color:0x0000ff,
-    		transparent: true, 
-    		opacity: 0.3
-    	});
-
-		var uniforms = {
-			"tDiffuse":  { type: "t", value: null },
-			"exposure":  { type: "f", value: 1.5 },
-			"brightMax": { type: "f", value: 0.5 }
-		}
-
-		/*
-    	var uniforms = {
-			"resolution":{ type:'v2',value:new THREE.Vector2(0,0)},
-			"noise":{ type:'f',value:.04}
-		};
-		*/
-
-    	this.materialShader = new THREE.ShaderMaterial({
-		  uniforms: uniforms,
-		  //attributes: attributes,
-		  vertexShader: document.getElementById('vertexShader').textContent,
-		  fragmentShader: document.getElementById('fragmentShader').textContent
-		});
-		
-
-
-
-
+		this.setupMaterials(textureCarted3js);
 
 
 	    // TRANSITION
@@ -446,9 +405,6 @@ var Dessin = function()
 	    {
 	    	this.transition[i] = new Transition();
 	    }
-
-
-		
 
 
 
@@ -499,7 +455,7 @@ var Dessin = function()
 
 		geometrie.computeFaceNormals();
 
-	    this.mesh = new THREE.Mesh(geometrie, this.materialMesh);
+	    this.mesh = new THREE.Mesh(geometrie, this.materialShader);
 	    this.mesh.doubleSided = true;		
 	    scene.add(this.mesh);
 		
@@ -507,6 +463,53 @@ var Dessin = function()
  		// scene.add(particleSystem);
 
 		//this.drawLines(scene);
+	}
+
+
+
+	this.setupMaterials = function(textureCarted3js)
+	{
+		//MATERIAL
+		this.materialMesh = new THREE.MeshLambertMaterial({ 
+	    	//map: textureCarted3js,
+	    	color:0xffee99,
+	    	side: THREE.DoubleSide,
+	    	//wireframe: true, 
+	    	//wireframeLinewidth: 1
+	    	//morphTargets: true
+	    });
+
+	    this.materialParticule = new THREE.ParticleBasicMaterial({
+      		color: 0xFF0000,
+      		size: 4
+    	});
+
+    	this.materialLine = new THREE.LineBasicMaterial({ 
+    		color:0x0000ff,
+    		transparent: true, 
+    		opacity: 0.3
+    	});
+
+
+		var texture = THREE.ImageUtils.loadTexture( 'uvmap.png' );
+
+		var attributes = {};
+
+		this.uniforms = {
+		  delta: {type: 'f', value: 0.0},
+		  scale: {type: 'f', value: 1.0},
+		  alpha: {type: 'f', value: 1.0},
+		  texture: { type: 't', value: textureCarted3js }
+		};
+
+
+    	this.materialShader = new THREE.ShaderMaterial({
+		  uniforms: this.uniforms,
+		  attributes: attributes,
+		  vertexShader: document.getElementById('vertexShader').textContent,
+		  fragmentShader: document.getElementById('fragmentShader').textContent
+		});
+		
 	}
 
 
@@ -528,6 +531,8 @@ var Dessin = function()
 
 	this.draw = function(scene)
 	{		
+
+		this.uniforms.delta.value += 0.1;
 
 		if(!this.transition[0].isFinished)
       	{
@@ -693,6 +698,10 @@ var Canvas = function()
 	this.onMouseMove = function(event)
 	{
 		this.xSouris = event.clientX;
+		// var ySouris = event.clientY;
+		// this.camera.position.x = map(this.xSouris, 0, window.innerWidth, -1000, 1000);
+		// this.camera.position.z = map(ySouris, 0, window.innerHeight, -1000, 1000);
+
 		this.positionCamera();
 		return false;
 	}
