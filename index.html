@@ -18,14 +18,98 @@
 	
 	<body>
 
-		
 
+		<!-- Hdr SHADER -->
+		<!--
+		<script type="x-shader/x-vertex" id="vertexShader">
+			varying vec2 vUv;
+
+			void main() {
+				vUv  = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentShader">
+
+			uniform sampler2D   tDiffuse;
+			uniform float       exposure;
+			uniform float       brightMax;
+
+			varying vec2  vUv;
+
+	    	vec3 decode_pnghdr( const in vec4 color ) {
+	        	
+	        	vec4 res = color * color;
+				float ri = pow( 2.0, res.w * 32.0 - 16.0 );
+				res.xyz = res.xyz * ri;
+				return res.xyz;
+			}
+
+			void main() {
+
+				vec4 color = texture2D( tDiffuse, vUv );
+				//color.xyz  = decode_pnghdr( color );
+
+				// Perform tone-mapping
+				float Y = dot(vec4(0.30, 0.59, 0.11, 0.0), color);
+				float YD = exposure * (exposure/brightMax + 1.0) / (exposure + 1.0);
+				color *= YD;
+
+				gl_FragColor = vec4( color.xyz, 1.0 );
+
+			}
+		 </script>
+		-->
+
+
+		<!-- NOISE SHADER -->
+		<!--
+		<script type="x-shader/x-vertex" id="vertexShader">
+			void main() {
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentShader">
+			uniform vec2 resolution;
+			uniform float noise;
+
+			#define VIG_REDUCTION_POWER 5.5
+			#define VIG_BOOST 4.1
+
+			float random(vec3 scale,float seed){
+			    return fract(sin(dot(gl_FragCoord.xyz+seed,scale))*43758.5453+seed);
+			}
+
+			void main() {
+
+				vec3 color = vec3( 200. / 255. );
+				vec2 center = resolution * 0.5;
+				float vignette = distance( center, gl_FragCoord.xy ) / resolution.x;
+				vignette = VIG_BOOST - vignette * VIG_REDUCTION_POWER;
+
+				float n = noise * ( .5 - random( vec3( 1. ), length( gl_FragCoord ) ) );
+
+				//gl_FragColor = vec4( color * vec3( vignette ) + vec3( n ), 1. );
+				gl_FragColor = vec4( color + vec3( n ), 1.0 );
+
+
+			}
+		</script>
+		-->
+
+
+
+
+		<!-- FUN SHADER -->
 		<script type="x-shader/x-vertex" id="vertexShader">
 			varying vec2 vUv;
 			uniform float delta;
 			uniform float scale;
 			uniform float alpha;
 			varying vec3 vNormal;
+			varying float hauteurPoint;
 
 			void main()
 			{
@@ -33,14 +117,18 @@
 			    vUv = uv;
 
 			    // mouvement
+			    /*
 			    vec3 p = position;
 			    p.z += sin(2.0 * p.y + delta) * 5.0;
 			    p.z += cos(2.0 * p.z + delta / 2.0) * 5.0;
 			    p.z += cos(2.0 * p.x + delta) * 5.0;
 			    p.x += sin(p.y + delta / 2.0) * 10.0;
+			    */
 
-			    gl_Position = projectionMatrix * modelViewMatrix * vec4(scale * p, 1.0 );
-			    //gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			    hauteurPoint = -position.z;
+
+			    //gl_Position = projectionMatrix * modelViewMatrix * vec4(scale * p, 1.0 );
+			    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 			}
 		</script>
 
@@ -50,11 +138,24 @@
 			#endif
 			uniform float delta;
 			uniform float alpha;
+			uniform float noise;
+			uniform float hauteurMax;
+			uniform vec3 lightPos;
 
 			varying vec2 vUv;
 			varying vec3 vNormal;
+			varying float hauteurPoint;
 
 			uniform sampler2D texture;
+
+			float random(vec3 scale,float seed){
+			    return fract(sin(dot(gl_FragCoord.xyz+seed,scale)) * 43758.5453 + seed);
+			}
+
+			float map(float valeur, float minRef, float maxRef, float minDest, float maxDest)
+			{
+				return minDest + (valeur - minRef) * (maxDest - minDest) / (maxRef - minRef);
+			}
 
 			void main(void)
 			{
@@ -62,23 +163,84 @@
 				vec4 texColor = texture2D( texture, vUv );
 
 				// normal
-				vec3 light = vec3(0.5, 0.2, -10.0);
+				//vec3 light = vec3(0.5, 0.2, -10.0);
+				vec3 light = lightPos;
 				light = normalize(light);
-				float dProd = max(0.0, dot(vNormal, light));
+				float diffuse = max(0.0, dot(vNormal, light));
 
 				// couleur changeante
-			    vec2 position = vUv;
-			    float red = 1.0;
-			    float green = 0.25 + sin(delta) * 0.25;
-			    float blue = 0.0;
-			    vec3 rgb = vec3(red, green, blue);
+			    // vec2 position = vUv;
+			    // float red = 1.0;
+			    // float green = 0.25 + sin(delta) * 0.25;
+			    // float blue = 0.0;
+			    // vec3 rgb = vec3(red, green, blue);
+
+				// noise
+			    float n = noise * ( .5 - random( vec3( 1. ), length( gl_FragCoord ) ) );
+
+			    // hauteur point
+
+			    
+			    
+
+			    float red; 
+			    float green;
+			    float blue;
+
+
+				
+				if(hauteurPoint < hauteurMax/5.000){
+					// de noir à rouge
+					red = map(hauteurPoint, 0.000, hauteurMax/5.000 , 0.200 , 1.000);
+					green = 0.200;
+					blue = 0.200;
+				}else if(hauteurPoint < 2.000*hauteurMax/5.000){
+					// de rouge à orange
+					red = 1.000;
+					green = map(hauteurPoint, hauteurMax/5.000, 2.000*hauteurMax/5.000 , 0.200 , 0.500);
+					blue = 0.200;
+				}else if(hauteurPoint < 3.000*hauteurMax/5.000){
+					// de orange à jaune
+					red = 1.000;
+					green = map(hauteurPoint, 2.000*hauteurMax/5.000, 3.000*hauteurMax/5.000 , 0.500 , 1.000);
+					blue = 0.200;
+				}else {
+					// de jaune à blanc
+					red = 1.000;
+					green = 1.000;
+					blue = map(hauteurPoint, 3.000*hauteurMax/5.000, 4.000*hauteurMax/5.000 , 0.200 , 1.000);
+				}
+
+				float moduloHeight = mod(hauteurPoint,2.0);
+				if( moduloHeight > 0.0 && moduloHeight < 0.2){
+					// de noir à rouge
+					red = 1.0;
+					green = 1.0;
+					blue = 1.0;
+				}
+
+				
+
+
+
+
 
 			    // rendu
-			    //vec4 color = vec4(rgb * dProd, alpha);
-			    gl_FragColor = vec4(texColor.x*dProd*rgb.x, texColor.y*dProd*rgb.y, texColor.z*dProd*rgb.z, alpha);
+			    // gl_FragColor = vec4(
+			    // 	texColor.x*(diffuse*2.0)*newHauteur+n+0.1, 
+			    // 	texColor.y*(diffuse*2.0)*0.4+n+0.1, 
+			    // 	texColor.z*(diffuse*2.0)*0.200+n+0.1, 
+			    // 	alpha);
+
+    			    gl_FragColor = vec4(
+				    	red*texColor.x+0.1, 
+				    	green*texColor.y+0.1, 
+				    	blue*texColor.z+0.1, 
+				    	texColor.w
+				    );
+
 			}
 		</script>
-
 
 
 

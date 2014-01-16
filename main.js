@@ -54,7 +54,7 @@ function ready(error, results)
 	pointsStructure = [];
 	infosPays = [];	// [ iso,idForme, [classementAnnee], [centroid] ] 
 	currentYear = 0;
-	hauteurMax = 16;
+	hauteurMax = 20.0;
 
 
 	ajoutDesPointsDuFormatDeLaCarte();
@@ -200,7 +200,7 @@ function dessinDeLaCarteTexture(results0, results1)
 						.style("top", (results1[i].an2013*20)+"px")
 						.attr("id", results1[i].iso)
 						.text(results1[i].name)
-						.on("click", function(){ canvas.moveCamToPays(this.id); });
+						.on("click", function(){ clickPays(this.id); });
 					
 
 					// ajout des capitales
@@ -222,10 +222,9 @@ function dessinDeLaCarteTexture(results0, results1)
 						var x = traductionCoor[0];
 						var y = traductionCoor[1];
 						
-						pointsStructure.push({ x: x, y: y, z: -map(results1[i].an2013, 0, 180, 0, hauteurMax) });
+						pointsStructure.push({ x: x, y: y, z: -map(results1[i].an2013, 180, 0, 0, hauteurMax) });
 						//pointsStructure.push([ x, y, --map(results1[i].an2013, 0, 180, 0, 40) ]);
-						infosPays.push([ d.id, cptId, [ parseInt(results1[i].an2013),  parseInt(results1[i].an2012)], 
-							[ x, y ] ]);
+						infosPays.push([ d.id, cptId, [ parseInt(results1[i].an2013),  parseInt(results1[i].an2012)], [ x, y ] ]);
 						cptId++;
 					}
 
@@ -455,6 +454,9 @@ var Dessin = function()
 
 		geometrie.computeFaceNormals();
 
+
+
+
 	    this.mesh = new THREE.Mesh(geometrie, this.materialShader);
 	    this.mesh.doubleSided = true;		
 	    scene.add(this.mesh);
@@ -472,11 +474,12 @@ var Dessin = function()
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
 	    	//map: textureCarted3js,
-	    	color:0xffee99,
+	    	//color:0xffee99,
 	    	side: THREE.DoubleSide,
 	    	//wireframe: true, 
 	    	//wireframeLinewidth: 1
 	    	//morphTargets: true
+	    	vertexColors: THREE.VertexColors
 	    });
 
 	    this.materialParticule = new THREE.ParticleBasicMaterial({
@@ -491,15 +494,21 @@ var Dessin = function()
     	});
 
 
-		var texture = THREE.ImageUtils.loadTexture( 'uvmap.png' );
-
 		var attributes = {};
 
 		this.uniforms = {
-		  delta: {type: 'f', value: 0.0},
-		  scale: {type: 'f', value: 1.0},
-		  alpha: {type: 'f', value: 1.0},
-		  texture: { type: 't', value: textureCarted3js }
+			delta: 	{type: 'f', value: 0.0},
+			scale: 	{type: 'f', value: 1.0},
+			alpha: 	{type: 'f', value: 1.0},
+			texture:  { type: 't', value: textureCarted3js },
+			noise: 	{ type:'f', value: 0.04 },
+			lightPos: { type:'v3', value: new THREE.Vector3(0.5, 0.2, -10.0) },
+			hauteurMax: { type: 'f', value: hauteurMax }
+
+			//tDiffuse:  { type: "t", value: textureCarted3js },
+			//exposure:  { type: "f", value: 1.5 },
+			//brightMax: { type: "f", value: 1.5 },
+
 		};
 
 
@@ -533,6 +542,7 @@ var Dessin = function()
 	{		
 
 		this.uniforms.delta.value += 0.1;
+		//this.uniforms.lightPos.value = new THREE.Vector3(this.spot2.position.x, this.spot2.position.y, this.spot2.position.z);
 
 		if(!this.transition[0].isFinished)
       	{
@@ -558,11 +568,17 @@ var Dessin = function()
 		for(var i = 0; i < infosPays.length; i++)
       	{
       		//this.lines[i].
-			this.transition[i].setup( this.mesh.geometry.vertices[infosPays[i][1]].z, -map(infosPays[i][2][currentYear], 0, 180, 0, hauteurMax ));
+			this.transition[i].setup( this.mesh.geometry.vertices[infosPays[i][1]].z, -map(infosPays[i][2][currentYear], 180, 0, 0, hauteurMax ));
 			this.transition[i].setTween(1);
 			this.transition[i].setSpeed(0.1);
 		}
 
+	}
+
+
+	this.drawLine = function(paysId)
+	{
+		console.log(paysId);
 	}
 
 	
@@ -653,7 +669,7 @@ var Canvas = function()
 		this.spot1.position.set( -200, 0, -200 );
 		this.scene.add(this.spot1);
 
-		this.spot2 = new THREE.DirectionalLight( 0xcc1111, 0.4 );
+		this.spot2 = new THREE.DirectionalLight( 0xffffff, 0.4 );
 		this.spot2.position.set( 200, 0, -200 );
 		this.scene.add(this.spot2);
 
@@ -698,11 +714,11 @@ var Canvas = function()
 	this.onMouseMove = function(event)
 	{
 		this.xSouris = event.clientX;
-		// var ySouris = event.clientY;
-		// this.camera.position.x = map(this.xSouris, 0, window.innerWidth, -1000, 1000);
-		// this.camera.position.z = map(ySouris, 0, window.innerHeight, -1000, 1000);
+		 var ySouris = event.clientY;
+		 this.camera.position.x = map(this.xSouris, 0, window.innerWidth, -1000, 1000);
+		 this.camera.position.z = map(ySouris, 0, window.innerHeight, -1000, 1000);
 
-		this.positionCamera();
+		//this.positionCamera();
 		return false;
 	}
 
@@ -770,24 +786,18 @@ var Canvas = function()
 
 
 
-	this.moveCamToPays = function(iso)
+	this.moveCamToPays = function(paysId)
 	{
 
-		for(var i = 0; i < infosPays.length; i++)
-		{
-			if(iso == infosPays[i][0])
-			{
-				this.camera.position.x = infosPays[i][3][0];
-				this.camera.position.y = infosPays[i][3][1]+100;
-				this.camera.position.z = -200;
 
-				this.focusCamera = [ infosPays[i][3][0], infosPays[i][3][1], -10 ];
-				//console.log(this.camera.position.x+" / "+this.camera.position.y+" / "+this.camera.position.z);
-				//this.transitionCamera.setup([this.camera.position.x,this.camera.position.y,this.camera.position.z], [ infosPays[i][3][0], infosPays[i][3][1]+100, -200 ]);
-				
+		this.camera.position.x = infosPays[paysId][3][0];
+		this.camera.position.y = infosPays[paysId][3][1]+100;
+		this.camera.position.z = -200;
 
-			}
-		}
+		this.focusCamera = [ infosPays[paysId][3][0], infosPays[paysId][3][1], -10 ];
+		//console.log(this.camera.position.x+" / "+this.camera.position.y+" / "+this.camera.position.z);
+		//this.transitionCamera.setup([this.camera.position.x,this.camera.position.y,this.camera.position.z], [ infosPays[paysId][3][0], infosPays[paysId][3][1]+100, -200 ]);
+		
 
 	}
 
@@ -800,8 +810,21 @@ var Canvas = function()
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 //////////////////////////////////////
-///////////// CHANGER ANNEE /////////
+///////////// INTERACTION /////////
 ////////////////////////////////////
 
 function changerAnnee(sens)
@@ -834,6 +857,22 @@ function changerAnnee(sens)
 
 
 
+
+function clickPays(isoPays)
+{
+	var id;
+	for(var i = 0; i < infosPays.length; i++)
+	{
+		if(isoPays == infosPays[i][0])
+		{
+			id = i;
+		}
+	}
+
+	canvas.moveCamToPays(id);
+	dessin.drawLine(id);
+
+}
 
 
 
