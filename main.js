@@ -3,17 +3,22 @@ window.addEventListener("load", setup, false);
 
 
 
+<<<<<<< HEAD
 var width = window.innerWidth;
 var height = window.innerHeight;
 
+=======
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 
 var canvas;
 var dessin;
 var projection = d3.geo
 	//.azimuthalEqualArea();
+	.mercator();
 	//.conicEquidistant();
 	//.orthographic();
+<<<<<<< HEAD
 	.mercator();
 projection.scale(80);
 var path = d3.geo.path().projection(projection);
@@ -21,28 +26,38 @@ var pointsStructure;
 var infosPays;
 var currentYear;
 var hauteurMax;
+=======
+	
+var largeurFenetre = window.innerWidth;
+var path = d3.geo.path().projection(projection);
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 
 
 
+<<<<<<< HEAD
 function lireCsv(url, callback) {
 	d3.csv(url, function(d){ callback(null, d); });
 }
 function lireJson(url, callback) {
 	d3.json(url, function(d){ callback(null, d); });
 }
+=======
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 
 function setup()
 {	
+
 	queue()
 		.defer(lireJson, "world-countries-clean.json")
-		.defer(lireCsv, "index.csv")
+		.defer(lireCsv, "index2013.csv")
 		.awaitAll(ready);
 	
 }
 
 
+<<<<<<< HEAD
 function ready(error, results) 
 {
 
@@ -60,36 +75,56 @@ function ready(error, results)
 	textureCarted3js.needsUpdate = true;
 
 	// scene 3d
+=======
+
+
+
+
+
+function ready(error, results) 
+{
+
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 	canvas = new Canvas();
 	canvas.setup(window.innerWidth, window.innerHeight);
 	
 	// dessin 3d
 	dessin = new Dessin();
-	dessin.setup(canvas.scene, textureCarted3js);
+	dessin.setup(canvas.getScene());
+	dessin.draw(canvas.getScene(), results[0], results[1]);
+	
+	animate();
 
+<<<<<<< HEAD
 	var btn_suivant = document.getElementById("btn_suivant");
 	var btn_precedent = document.getElementById("btn_precedent");
 	var btn_retour = document.getElementById("current_year");
 	btn_suivant.addEventListener("click", function(){ changerAnnee(-1); }, false);
 	btn_precedent.addEventListener("click", function(){ changerAnnee(1); }, false);
 	btn_retour.addEventListener("click", function(){ init(); }, false);
+=======
+}
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 	changerAnnee(-1);	
 
+<<<<<<< HEAD
 	//setTimeout(animate, 5000);
 	animate();
 	
 }
+=======
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 
 
 function animate()
 {
 
-	requestAnimationFrame(animate);	
-	dessin.draw(canvas.scene);
+	requestAnimationFrame( animate );	
+	//dessin.draw(canvas.getScene());
 	canvas.draw();
-	
+
 }
 
 
@@ -99,59 +134,14 @@ function animate()
 
 
 
-
-
-
-
-/////////////////////////////////////////////
-//////////// D3 ////////////////////////////
+//////////////////////////////////////////////
+///////////////// D3 ////////////////////////
 ////////////////////////////////////////////
 
-
-function ajoutDesPointsDuFormatDeLaCarte()
-{
-
-	var HG = projection([-180,	84]);
-	var HD = projection([180,	84]);
-	var BD = projection([180,	-84]);
-	var BG = projection([-180,	-84]);
-	var MG = projection([-180,	0]);
-	var MD = projection([180,	0]);
-
-	pointsStructure.push({ x: HG[0], y: HG[1], z:0 });
-	pointsStructure.push({ x: HD[0], y: HD[1], z:0 });
-	pointsStructure.push({ x: MG[0], y: MG[1], z:0 });
-	pointsStructure.push({ x: MD[0], y: MD[1], z:0 });
-	pointsStructure.push({ x: BG[0], y: BG[1], z:0 });
-	pointsStructure.push({ x: BD[0], y: BD[1], z:0 });
-
-	// pointsStructure.push( [ HG[0] , HG[1] , 0 ]);
-	// pointsStructure.push( [ HD[0] , HD[1] , 0 ]);
-	// pointsStructure.push( [ MG[0] , MG[1] , 0 ]);
-	// pointsStructure.push( [ MD[0] , MD[1] , 0 ]);
-	// pointsStructure.push( [ BG[0] , BG[1] , 0 ]);
-	// pointsStructure.push( [ BD[0] , BD[1] , 0 ]);
-
-
-	var nbPointsParCote = 20;
-	for(var i = 1; i < nbPointsParCote-1; i++)
-	{
-		var pointLigneHaut = projection([map(i, 0, nbPointsParCote, -180, 180),	84]);
-		var pointLigneBas = projection([map(i, 0, nbPointsParCote, -180, 180),	-84]);
-		var pointLigneGauche = projection([ -180, map(i, 0, nbPointsParCote, -84, 84)]);
-		var pointLigneDroite = projection([ 180, map(i, 0, nbPointsParCote, -84, 84)]);
-
-		pointsStructure.push({ x: pointLigneHaut[0] , 	y:pointLigneHaut[1], z:0 });
-		pointsStructure.push({ x: pointLigneBas[0] , 	y:pointLigneBas[1], z:0 });
-		pointsStructure.push({ x: pointLigneGauche[0] , y:pointLigneGauche[1], z:0 });
-		pointsStructure.push({ x: pointLigneDroite[0] , y:pointLigneDroite[1], z:0 });
-
-		// pointsStructure.push([ pointLigneHaut[0], pointLigneHaut[1], 0 ]);
-		// pointsStructure.push([ pointLigneBas[0], pointLigneBas[1], 0 ]);
-		// pointsStructure.push([ pointLigneGauche[0], pointLigneGauche[1], 0 ]);
-		// pointsStructure.push([ pointLigneDroite[0], pointLigneDroite[1], 0 ]);
-	}
+function lireCsv(url, callback) {
+	d3.csv(url, function(d){ callback(null, d); });
 }
+<<<<<<< HEAD
 
 
 
@@ -237,128 +227,34 @@ function dessinDeLaCarteTexture(results0, results1)
 
 		});
 
+=======
+function lireJson(url, callback) {
+	d3.json(url, function(d){ callback(null, d); });
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 }
 
 
 
+function getPath(path){
+
+	var chaine = path.replace(/Z/g,""); 
+	chaine = chaine.replace(/[L,]/g," ");
+	var pathFragment = chaine.split("M");
+	var coor = [];
 
 
-
-
-
-
-function ajoutDesPointsDesFrontieresDesPays()
-{
-
-	// lire le svg avec les nouveaux points
-	var obj = document.getElementById("object");
-	
-	var svg = obj.contentDocument;
-	
-
-	// polygons
-	var polygons = svg.getElementsByTagName("polygon");
-	var cpt = 0;
-	
-	if(polygons.length > 0)
+	for(var i = 1; i < pathFragment.length; i++) // on commence a un car le split fait une premiere partie vide
 	{
-		for(var i = 0; i < polygons.length; i++)
+		var coordonnees = pathFragment[i].split(" ");
+		coor[i-1] = [];
+
+		for(var j = 0; j < coordonnees.length; j++) 
 		{
-			var strPoints = polygons[i].getAttribute("points");
-			strPoints = strPoints.replace(/\s{2,}/g, " ");	// supprime double espace
-			strPoints = strPoints.replace(/\t/g, "");		// supprime tabulation
-			strPoints = strPoints.replace(/,/g, " ");		// supprime virgule
-
-			var points = strPoints.split(" ");
-
-			for(var j = 0; j < points.length-1; j += 2)		// car dernier element vide
-			{
-				if(points[j+1] >= 84){ points[j+1] = 84; } 
-				if(points[j+1] <= -84){ points[j+1] = -84; } 
-				var extraPoint = projection([ points[j], points[j+1] ]);
-				pointsStructure.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });	
-			}
+			coor[i-1][j] = parseFloat(coordonnees[j]);
 		}	
 	}
-
-
-
-	
-	// path
-	var paths = svg.getElementsByTagName("path");
-	for(var i = 0; i < paths.length; i++) 
-	{
-		var strPath = paths[i].getAttribute("d");
-		strPath = strPath.replace(/[ZzVvMmHhCcSs,Ll]/g, " ");
-		strPath = strPath.replace(/-/g," -");
-		strPath = strPath.replace(/  /g, " ");
-		strPath = strPath.replace(/  /g, " ");
-		strPath = strPath.replace(/  /g, " ");
-		strPath = strPath.replace(/  /g, " ");
-		
-		//console.log(strPath);
-		points = strPath.split(" ");
-
-		var cpt = 0;
-		for(var j = 0; j < points.length; j+=2) // dernier vide
-		{
-			console.log(points[j]);
-			//console.log(points[j]+" "+points[j+1]);
-
-			if(points[j+1] >= 84){ points[j+1] = 84; } 
-			if(points[j+1] <= -84){ points[j+1] = -84; } 
-
-			var extraPoint = projection([ points[j], points[j+1] ]);
-			pointsStructure.push({ x: extraPoint[0], y: extraPoint[1], z: 0 });
-			//console.log(extraPoint[0]+" / "+extraPoint[1]);
-		}
-	}
-
+	return coor;
 }
-
-
-
-
-
-
-
-
-
-function creationCanvasTexture()
-{
-
-	var svgImg = document.getElementById("carted3js");
-
-    // transforme le svg en image
-    var xml = new XMLSerializer().serializeToString(svgImg);
-	var data2 = "data:image/svg+xml;base64," + btoa(xml);
-	
-	var imageTexture = new Image(); 
-	imageTexture.setAttribute('src', data2);
-
-	// creation du canvas 2d
-	var canvas2d = document.createElement( "canvas" );
-	canvas2d.width = width;
-	canvas2d.height = height;
-
-	var context = canvas2d.getContext( '2d' );
-
-	context.drawImage(imageTexture, 0, 0);
-	imageTextureData = context.getImageData( 0, 0, width, height );
-	context.putImageData( imageTextureData, 0, 0 );
-	//document.body.appendChild(canvas2d);
-
-	return canvas2d;
-
-}
-
-
-
-
-
-
-
-
 
 
 
@@ -369,26 +265,85 @@ function creationCanvasTexture()
 
 
 /////////////////////////////////////////////
-//////////// THREE /////////////////////////
+//////////// DESSIN ////////////////////////
 ////////////////////////////////////////////
 
 var Dessin = function()
 {
-	this.materialMesh;
-	this.materialParticule;
-	this.materialLine;
-	this.materialShader;
 
+	this.material;
+	this.material2;
+	this.material3;
+	this.materialMesh;
+	this.centroid;
+	// this.group; = new THREE.Object3D();//create an empty container
+	// group.add( mesh );//add a mesh with geometry to it
+	// scene.add( group );//when done, add the group to the scene
+
+<<<<<<< HEAD
 	this.mesh;
 	this.transition;
 	this.lines;
 	this.line;
 	this.transitionLine;
+=======
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
-	this.uniforms;
+
+	this.setup = function(scene)
+	{
+		this.centroid = [];
+
+		var HG = projection([-180,84]);
+		var HD = projection([180,84]);
+		var BD = projection([180,-66]);
+		var BG = projection([-180,-66]);
+		var MG = projection([-180,0]);
+		var MD = projection([180,0]);
+
+		// var extraPoints = []
+
+		// extraPoints.push(projection([-180,-28]));
+		// extraPoints.push(projection([-139,-28]));
+		// extraPoints.push(projection([-110,-5]));
+		// extraPoints.push(projection([-90,0]));
+		// extraPoints.push(projection([-79,10]));
+		// extraPoints.push(projection([-80,29]));
+		// extraPoints.push(projection([-69,37]));
+		// extraPoints.push(projection([-29,4]));
+		// extraPoints.push(projection([-70,-15]));
+		// extraPoints.push(projection([-50,-29]));
+		// extraPoints.push(projection([-80,-69]));
+		// extraPoints.push(projection([18,-70]));
+		// extraPoints.push(projection([-10,-38]));
+		// extraPoints.push(projection([-20,-16]));
+		// extraPoints.push(projection([-20,-1]));
+		// extraPoints.push(projection([4,0]));
+		// extraPoints.push(projection([9,5]));
+		// extraPoints.push(projection([19,22]));
+		// extraPoints.push(projection([30,22]));
+		// extraPoints.push(projection([50,15]));
+		// extraPoints.push(projection([59,-5]));
+		// extraPoints.push(projection([78,10]));
+		// extraPoints.push(projection([89,-1]));
+		// extraPoints.push(projection([109,22]));
+		// extraPoints.push(projection([149,29]));
+		// extraPoints.push(projection([179,28]));
+		// extraPoints.push(projection([179,4]));
+		// extraPoints.push(projection([131,-11]));
+		// extraPoints.push(projection([179,-37]));
+
+		// for (var i=0; i< extraPoints.length ; i++){
+		// 	this.centroid.push( [ extraPoints[i][0] , extraPoints[i][1] , 0 ]);		
+		// }
+
+		// TEXTURE
+		var texture = THREE.ImageUtils.loadTexture("imageCarte.png");
+		// texture.wrapS = THREE.RepeatWrapping; 
+		// texture.wrapT = THREE.RepeatWrapping;
 
 
-
+<<<<<<< HEAD
 	this.setup = function(scene, textureCarted3js)
 	{
 		
@@ -407,52 +362,69 @@ var Dessin = function()
 	    this.lines = [];
 
 	    geometrie = new THREE.Geometry();
+=======
 
-	    for (var i = 0; i < pointsStructure.length; i++ )
-	    {
-			geometrie.vertices.push({ x: pointsStructure[i].x, y: pointsStructure[i].y, z: pointsStructure[i].z });
-			//geometrie.vertices.push({ x: pointsStructure[i][0], y: pointsStructure[i][1], z: pointsStructure[i][2] });
-		}
+		//MATERIAL
+		this.materialMesh = new THREE.MeshLambertMaterial({ 
+	    	map: texture,
+	    	//color:0xffee99,
+	    	side: THREE.DoubleSide
+	    });
 
-		var delaunay = triangulate(pointsStructure);
-		//var delaunay = d3.geom.delaunay(pointsStructure);
 
+		this.centroid.push( [ HG[0] , HG[1] , 0 ]);
+		this.centroid.push( [ HD[0] , HD[1] , 0 ]);
+		this.centroid.push( [ BD[0] , BD[1] , 0 ]);
+		this.centroid.push( [ BG[0] , BG[1] , 0 ]);
+		this.centroid.push( [ MG[0] , MG[1] , 0 ]);
+		this.centroid.push( [ MD[0] , MD[1] , 0 ]);
+
+		this.material = new THREE.LineBasicMaterial({
+	        color: 0x666666,
+			linewidth: 1
+	    });
+	    this.material2 = new THREE.LineBasicMaterial({
+	        color: 0xffffff,
+			transparent: true, opacity: 0
+	    });
+	    this.material3 = new THREE.LineBasicMaterial({
+	        color: 0x6666ff,
+			transparent: true, opacity: 1
+	    });	
 		
-		for (var i=0; i < delaunay.length; i++ )
+		// light
+		scene.add( new THREE.AmbientLight( 0x212223 ) );
+		var light = new THREE.DirectionalLight(0xffffff, 1);
+		light.position.set( -200, 0, -200 );
+		scene.add(light);
+
+      	
+	}
+
+
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+
+	this.draw = function(scene, data, dataIndex)
+	{		
+
+		// dessin de la carte
+		for(var k = 0; k < data.features.length; k++)
 		{
-			// trouver les ids des vertices de chaque triangles
-			var id_a, id_b, id_c;
-			for(var k = 0; k < geometrie.vertices.length; k++ )
+
+			// couleur du pays
+			var isIndexed = false;
+			var color = "#333";
+			for(var l = 0; l < dataIndex.length; l++)
 			{
-				//if(delaunay[i][0][0] == geometrie.vertices[k].x && delaunay[i][0][1] == geometrie.vertices[k].y && delaunay[i][0][2] == geometrie.vertices[k].z)
-				if(delaunay[i].a.x == geometrie.vertices[k].x && delaunay[i].a.y == geometrie.vertices[k].y && delaunay[i].a.z == geometrie.vertices[k].z)
+
+
+				if(dataIndex[l].iso == data.features[k].id)
 				{
-					id_a = k;
-				}
-				//if(delaunay[i][1][0] == geometrie.vertices[k].x && delaunay[i][1][1] == geometrie.vertices[k].y && delaunay[i][1][2] == geometrie.vertices[k].z)
-				if(delaunay[i].b.x == geometrie.vertices[k].x && delaunay[i].b.y == geometrie.vertices[k].y && delaunay[i].b.z == geometrie.vertices[k].z)
-				{
-					id_b = k;
-				}
-				//if(delaunay[i][2][0] == geometrie.vertices[k].x && delaunay[i][2][1] == geometrie.vertices[k].y && delaunay[i][2][2] == geometrie.vertices[k].z)
-				if(delaunay[i].c.x == geometrie.vertices[k].x && delaunay[i].c.y == geometrie.vertices[k].y && delaunay[i].c.z == geometrie.vertices[k].z)
-				{
-					id_c = k;
-				}
-			}
-			geometrie.faces.push( new THREE.Face3( id_a, id_b, id_c ));
+					
+					isIndexed = true;
 
-			// coordonnees de textures
-			geometrie.faceVertexUvs[0].push([
-		        new THREE.Vector2( map(geometrie.vertices[id_a].x, 0,width, 0,1), map(geometrie.vertices[id_a].y, 0,height, 1,0) ),
-		        new THREE.Vector2( map(geometrie.vertices[id_b].x, 0,width, 0,1), map(geometrie.vertices[id_b].y, 0,height, 1,0) ),
-		        new THREE.Vector2( map(geometrie.vertices[id_c].x, 0,width, 0,1), map(geometrie.vertices[id_c].y, 0,height, 1,0) )
-	        ]);
-		}
-
-		geometrie.computeFaceNormals();
-
-
+<<<<<<< HEAD
 	    this.mesh = new THREE.Mesh(geometrie, this.materialShader);
 	    this.mesh.doubleSided = true;		
 	    scene.add(this.mesh);
@@ -486,9 +458,30 @@ var Dessin = function()
 			scene.add(this.lines[i]);
 		}
 	}
+=======
+					switch(dataIndex[l].cat)
+					{
+						case "Very serious situation": 	color = "#000000"; break;
+						case "Difficult situation": 	color = "#dc002e"; break;
+						case "Noticeable problems": 	color = "#f29901"; break;
+						case "Satisfactory situation": 	color = "#fee504"; break;
+						case "Good situation": 			color = "#fff"; break;
+						default: 						color = "#000"; break;
+					}
+				}	
+			}
 
 
 
+			if(isIndexed)
+			{
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+
+				// calcul du centroid
+				var centroidTemporaire = path.centroid(data.features[k]);
+
+<<<<<<< HEAD
 
 
 
@@ -503,12 +496,15 @@ var Dessin = function()
 	    	//wireframeLinewidth: 1
 	    	vertexColors: THREE.VertexColors
 	    });
+=======
+				var centro = [centroidTemporaire[0], centroidTemporaire[1], -(k)*0.2 ];
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
-	    this.materialParticule = new THREE.ParticleBasicMaterial({
-      		color: 0xFF0000,
-      		size: 4
-    	});
+				
+				this.centroid.push( centro );
+				//this.centroid[k] = [centroidTemporaire[0], centroidTemporaire[1], k-200 ];
 
+<<<<<<< HEAD
     	this.materialLine = new THREE.LineBasicMaterial({ 
     		color:0xe2ff06b,
     		transparent: true, 
@@ -539,25 +535,90 @@ var Dessin = function()
 		});
 		
 	}
+=======
+				// traits du centroid vers la note
+				var g = new THREE.Geometry();
+				g.vertices.push(new THREE.Vector3(centro[0], centro[1], 0));
+				g.vertices.push(new THREE.Vector3(centro[0], centro[1], centro[2]));
+				var l = new THREE.Line(g, this.material3);
+				scene.add(l);
+			}
 
 
+			var material = new THREE.MeshBasicMaterial( { color: color, transparent: true, opacity: 0.8 } );
+			material.side = THREE.DoubleSide;
 
-	
+			// recuperer les coordonnees
+			var coor = getPath(path(data.features[k]));
 
+			for(var i = 0; i < coor.length; i++)
+			{
+				var c = [];
+				var geometryBorder = new THREE.Geometry();
 
+				for(var j = 0; j < coor[i].length; j+=2)
+				{
+					c.push( new THREE.Vector2 ( coor[i][j], coor[i][j+1] ) );
+					geometryBorder.vertices.push(new THREE.Vector3(coor[i][j], coor[i][j+1], 0));
+				}
+				
+				// dernier points pour fermer la forme
+				c.push( new THREE.Vector2(coor[i][0], coor[i][1] ) );
+				geometryBorder.vertices.push(new THREE.Vector3(coor[i][0], coor[i][1], 0));
 
-	this.draw = function(scene)
-	{		
+				// creation de la forme et de sa geometrie
+				var shape = new THREE.Shape(c);
+				var geometry = new THREE.ShapeGeometry( shape );
 
-		this.uniforms.delta.value += 0.1;
+				// dessin de la forme pleine
+				var mesh = new THREE.Mesh( geometry, material );
+				scene.add(mesh);
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
-		if(!this.transition[0].isFinished)
-      	{
-      		for(var i = 0; i < infosPays.length; i++)
-      		{
-				this.mesh.geometry.vertices[infosPays[i][1]].z = this.transition[i].execute();
+				// dessin de la ligne
+				var line = new THREE.Line(geometryBorder, this.material);
+				line.position.set(0, 0, -1);
+				
+				scene.add(line);
 
 			}
+
+<<<<<<< HEAD
+	
+=======
+		}
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+		this.dessinerNotesPays(scene);
+
+
+	}
+	
+
+	
+	this.dessinerNotesPays = function(scene)
+	{
+
+<<<<<<< HEAD
+		this.uniforms.delta.value += 0.1;
+=======
+		// delaunay sur les centroid
+		/*
+		var schema = d3.geom.delaunay(this.centroid);
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+		// dessin des centroids
+		for(var i = 0; i < schema.length; i++)
+		{
+			var geometry = new THREE.Geometry();
+			var g = new THREE.Geometry();
+
+			for(var j = 0; j < 3; j++)
+			{	
+				geometry.vertices.push(new THREE.Vector3(schema[i][j][0], schema[i][j][1], schema[i][j][2]));
+				g.vertices.push(new THREE.Vector3(schema[i][j][0], schema[i][j][1], schema[i][j][2]));
+			}
+<<<<<<< HEAD
 			this.mesh.geometry.verticesNeedUpdate = true;	
       	}
 
@@ -568,25 +629,58 @@ var Dessin = function()
 			this.line.geometry.vertices[0].z = currentPosition;
 			this.line.geometry.verticesNeedUpdate = true;
 		}
+=======
+
+			// dessin de la ligne
+			var line = new THREE.Line(geometry, this.material2);
+			scene.add(line);
+
+			// dessin de la forme pleine
+			g.faces.push( new THREE.Face3( 0, 1, 2 ) );
+			g.computeFaceNormals();
+			var mesh = new THREE.Mesh(g, this.materialMesh);
+			mesh.doubleSided = true;
+			scene.add(mesh);			
+			
+		}*/
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 	}
 
+		var delaunay = d3.geom.delaunay(this.centroid);
 
+	    var geometrie = new THREE.Geometry();
 
+	    for (var i=0; i < delaunay.length; i++ ){
+	    	geometrie.vertices.push(new THREE.Vector3(delaunay[i][0][0], delaunay[i][0][1], delaunay[i][0][2]));
+			geometrie.vertices.push(new THREE.Vector3(delaunay[i][1][0], delaunay[i][1][1], delaunay[i][1][2]));
+			geometrie.vertices.push(new THREE.Vector3(delaunay[i][2][0], delaunay[i][2][1], delaunay[i][2][2]));
+			geometrie.faces.push( new THREE.Face3( 3*i,1+3*i,2+3*i ));
 
-	this.changementAnnee = function(scene)
-	{
+		    geometrie.faceVertexUvs[0].push([
+		        new THREE.Vector2( map(delaunay[i][0][0],1,1000,0,1), map(delaunay[i][0][1],1,1000,1,0) ),
+		        new THREE.Vector2( map(delaunay[i][1][0],1,1000,0,1), map(delaunay[i][1][1],1,1000,1,0) ),
+		        new THREE.Vector2( map(delaunay[i][2][0],1,1000,0,1), map(delaunay[i][2][1],1,1000,1,0) )
+	        ]);
 
+<<<<<<< HEAD
 		for(var i = 0; i < infosPays.length; i++)
       	{
 			this.transition[i].setup( this.mesh.geometry.vertices[infosPays[i][1]].z, -map(infosPays[i][2][currentYear], 180, 0, 0, hauteurMax ));
 			this.transition[i].setTween(1);
 			this.transition[i].setSpeed(0.1);
 		}
+=======
+	    }
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
-	}
+	    geometrie.computeFaceNormals();
 
+	    var mesh = new THREE.Mesh(geometrie, this.materialMesh);
+	    mesh.doubleSided = true;		
+	    scene.add(mesh);
 
+<<<<<<< HEAD
 
 
 	this.drawLine = function(paysId)
@@ -601,9 +695,10 @@ var Dessin = function()
 	this.deleteLine = function()
 	{
 		this.transitionLine.setup(0, -400);
+=======
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 	}
 
-	
 }
 
 
@@ -645,10 +740,11 @@ var Dessin = function()
 
 var Canvas = function()
 {
-
+	this.camera;
 	this.renderer;
 	this.scene;
 	this.centreCarte;
+<<<<<<< HEAD
 
 	this.xSouris; this.scrollSouris; this.mouseDown;
 	this.xSourisOld;
@@ -668,6 +764,11 @@ var Canvas = function()
 	this.transitionCamera;
 	this.transitionFocusCamera;
 
+=======
+	this.positionInitCam;
+	this.xSouris;
+	this.scrollSouris;
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 	this.setup = function(WIDTH, HEIGHT)
 	{
@@ -678,6 +779,7 @@ var Canvas = function()
 		    FAR = 10000;
 
 
+<<<<<<< HEAD
 		this.mouseDown = false;
 		this.scrollSouris = 100;
 		this.centreCarte = projection([0,0]);
@@ -709,12 +811,26 @@ var Canvas = function()
 		this.camera.lookAt(new THREE.Vector3( this.focusCamera[0], this.focusCamera[1], this.focusCamera[2] ));
 		this.scene.add(this.camera);
 
+=======
+		this.scrollSouris = 100
+
+		this.centreCarte = projection([0,0]);
+		this.positionInitCam = projection([0,-89]);
+
+		//this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR );
+		this.camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 10000 );
+		this.camera.position.set(this.positionInitCam[0], this.positionInitCam[1], -1000);
+		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+		this.camera.up = new THREE.Vector3(0, 0, -1);
+
+		this.scene = new THREE.Scene();
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 	
-		// RENDERER
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(WIDTH, HEIGHT);
 		this.renderer.setClearColor("#ffffff", 1);
 
+<<<<<<< HEAD
 		// LIGHT
 		this.scene.add( new THREE.AmbientLight( 0x888888 ) );
 
@@ -736,6 +852,9 @@ var Canvas = function()
 
     	var canvas = this.renderer.domElement;
 		document.body.appendChild(canvas);
+=======
+		document.body.appendChild(this.renderer.domElement);
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 		
 		var clone = this;
 		canvas.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
@@ -750,6 +869,7 @@ var Canvas = function()
 
 	this.draw = function()
 	{
+<<<<<<< HEAD
 
 		//this.positionSpot();
 		
@@ -773,12 +893,17 @@ var Canvas = function()
 		}
 		this.renderer.render(this.scene, this.camera);
 
+=======
+		this.scene.add(this.camera);
+		this.renderer.render(this.scene, this.camera);	
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 	}
 	
 
 	
 	this.onMouseMove = function(event)
 	{
+<<<<<<< HEAD
 		if(this.mouseDown)
 		{
 			this.xSouris = event.clientX;
@@ -800,6 +925,22 @@ var Canvas = function()
 
 	    var event = window.event || event;
 	    var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+=======
+		var xSouris = event.clientX;
+		//this.positionCamera();
+		this.camera.position.x = map(xSouris, 0, window.innerWidth, -1000, 1000);
+		//this.camera.position.y = map(xSouris, 0, window.innerWidth, -1000, 1000);
+		//this.camera.position.z = map(xSouris, 0, window.innerWidth, -1000, 1000);
+		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+		return false;
+	}
+
+	this.onMouseScroll = function(e) {
+
+	    // cross-browser wheel delta
+	    var e = window.event || e;
+	    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 	    this.scrollSouris += delta;
 	    this.scrollSouris = Math.min(this.scrollSouris, 70);
 	    this.scrollSouris = Math.max(this.scrollSouris, 40);
@@ -809,6 +950,7 @@ var Canvas = function()
 	
 	}
 
+<<<<<<< HEAD
 
 	this.onMouseDown = function(event)
 	{
@@ -875,23 +1017,31 @@ var Canvas = function()
 
 
 
-
-	this.positionSpot = function()
+=======
+	this.positionCamera = function()
 	{
-		this.angleSpot++;
-		var rayon = 1000;
-		var centre = this.centreCarte;
 
-		var x = (Math.cos(this.angleSpot*(Math.PI/180)) * rayon)+centre[0];
-		var y = (Math.sin(this.angleSpot*(Math.PI/180)) * rayon)+centre[1];
+		var coordonneesCamera = []
+		var angleMax = 180;
+		var angleOrbiteCamera, rayonOrbiteCamera;
+		var rayonMin = 100;
+		var rayonMax = projection([180,0]);
+			rayonMax = rayonMax[1];
 
-		this.repereCube.position.x = x;
-		this.spot2.position.x = x;
-		this.repereCube.position.y = y;
-		this.spot2.position.y = y;
+		angleOrbiteCamera =  angleMax * this.xSouris / largeurFenetre;
+		//calcul du rayon de l'orbite de la caméra
+		rayonOrbiteCamera = this.positionInitCam[1]*this.scrollSouris/100
+		coordonneesCamera = [Math.cos(angleOrbiteCamera*(Math.PI/180))*rayonOrbiteCamera, Math.sin(angleOrbiteCamera*(Math.PI/180))*rayonOrbiteCamera] ;
+		
+		this.camera.position.x = coordonneesCamera[0]+this.positionInitCam[0];
+		this.camera.position.y = coordonneesCamera[1];
+		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 	}
 
 
+<<<<<<< HEAD
 	this.init = function()
 	{
 		if(this.isZoom)
@@ -912,6 +1062,14 @@ var Canvas = function()
 	}
 
 
+=======
+	
+	
+	
+	// GET / SET ///////////////////////////
+	this.getScene = function(){ return this.scene; }
+	
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 }
 
 
@@ -927,6 +1085,7 @@ var Canvas = function()
 
 
 
+<<<<<<< HEAD
 
 
 
@@ -1005,3 +1164,5 @@ function init()
 
 
 
+=======
+>>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
