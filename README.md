@@ -33,3 +33,4 @@ A tester
 - profondeur de champs (ça à l'air chaud)
 - traits OK
 - POSITION DANS LE CANVAS var position = new THREE.Vector3().getPositionFromMatrix( object.matrixWorld );
+

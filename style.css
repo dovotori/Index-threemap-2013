@@ -18,10 +18,9 @@ canvas
 {
 	position: absolute;
 	margin: 0; padding: 0;
-	top: 0; left: 0;
+	top: 40px; left: 0;
 	z-index: 0;
 }
-
 
 
 svg, object
@@ -29,6 +28,12 @@ svg, object
 	display: none;
 }
 
+
+#control_annees
+{
+	margin-top: 10px;
+	z-index: 1;
+}
 
 
 #classement
@@ -42,7 +47,7 @@ svg, object
 	left: 20px;
 	overflow: scroll;
 	background-color: #ccc;
-	padding-left: 20px;
+	padding: 20px;
 	z-index: 1;
 }
 

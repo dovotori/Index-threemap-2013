@@ -19,85 +19,6 @@
 	<body>
 
 
-		<!-- Hdr SHADER -->
-		<!--
-		<script type="x-shader/x-vertex" id="vertexShader">
-			varying vec2 vUv;
-
-			void main() {
-				vUv  = uv;
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-			}
-		</script>
-
-		<script type="x-shader/x-fragment" id="fragmentShader">
-
-			uniform sampler2D   tDiffuse;
-			uniform float       exposure;
-			uniform float       brightMax;
-
-			varying vec2  vUv;
-
-	    	vec3 decode_pnghdr( const in vec4 color ) {
-	        	
-	        	vec4 res = color * color;
-				float ri = pow( 2.0, res.w * 32.0 - 16.0 );
-				res.xyz = res.xyz * ri;
-				return res.xyz;
-			}
-
-			void main() {
-
-				vec4 color = texture2D( tDiffuse, vUv );
-				//color.xyz  = decode_pnghdr( color );
-
-				// Perform tone-mapping
-				float Y = dot(vec4(0.30, 0.59, 0.11, 0.0), color);
-				float YD = exposure * (exposure/brightMax + 1.0) / (exposure + 1.0);
-				color *= YD;
-
-				gl_FragColor = vec4( color.xyz, 1.0 );
-
-			}
-		 </script>
-		-->
-
-
-		<!-- NOISE SHADER -->
-		<!--
-		<script type="x-shader/x-vertex" id="vertexShader">
-			void main() {
-				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-			}
-		</script>
-
-		<script type="x-shader/x-fragment" id="fragmentShader">
-			uniform vec2 resolution;
-			uniform float noise;
-
-			#define VIG_REDUCTION_POWER 5.5
-			#define VIG_BOOST 4.1
-
-			float random(vec3 scale,float seed){
-			    return fract(sin(dot(gl_FragCoord.xyz+seed,scale))*43758.5453+seed);
-			}
-
-			void main() {
-
-				vec3 color = vec3( 200. / 255. );
-				vec2 center = resolution * 0.5;
-				float vignette = distance( center, gl_FragCoord.xy ) / resolution.x;
-				vignette = VIG_BOOST - vignette * VIG_REDUCTION_POWER;
-
-				float n = noise * ( .5 - random( vec3( 1. ), length( gl_FragCoord ) ) );
-
-				//gl_FragColor = vec4( color * vec3( vignette ) + vec3( n ), 1. );
-				gl_FragColor = vec4( color + vec3( n ), 1.0 );
-
-
-			}
-		</script>
-		-->
 
 
 
@@ -168,27 +89,22 @@
 				light = normalize(light);
 				float diffuse = max(0.0, dot(vNormal, light));
 
-				// couleur changeante
-			    // vec2 position = vUv;
-			    // float red = 1.0;
-			    // float green = 0.25 + sin(delta) * 0.25;
-			    // float blue = 0.0;
-			    // vec3 rgb = vec3(red, green, blue);
 
 				// noise
 			    float n = noise * ( .5 - random( vec3( 1. ), length( gl_FragCoord ) ) );
 
-			    // hauteur point
+			    // luminosite
+			    float luminosite = 0.0;
 
 			    
 			    
 
-			    float red; 
-			    float green;
-			    float blue;
+			    float red = 0.0; 
+			    float green = 0.4;
+			    float blue = 0.6;
 
 
-				
+				/*
 				if(hauteurPoint < hauteurMax/5.000){
 					// de noir à rouge
 					red = map(hauteurPoint, 0.000, hauteurMax/5.000 , 0.200 , 1.000);
@@ -210,15 +126,18 @@
 					green = 1.000;
 					blue = map(hauteurPoint, 3.000*hauteurMax/5.000, 4.000*hauteurMax/5.000 , 0.200 , 1.000);
 				}
+				*/
 
+
+				/*
 				float moduloHeight = mod(hauteurPoint,2.0);
-				if( moduloHeight > 0.0 && moduloHeight < 0.2){
-					// de noir à rouge
+				if( moduloHeight > 0.0 && moduloHeight < 0.1)
+				{
 					red = 1.0;
 					green = 1.0;
 					blue = 1.0;
 				}
-
+				*/
 				
 
 
@@ -232,12 +151,12 @@
 			    // 	texColor.z*(diffuse*2.0)*0.200+n+0.1, 
 			    // 	alpha);
 
-    			    gl_FragColor = vec4(
-				    	red*texColor.x+0.1, 
-				    	green*texColor.y+0.1, 
-				    	blue*texColor.z+0.1, 
-				    	texColor.w
-				    );
+			    gl_FragColor = vec4(
+			    	texColor.x*red*diffuse+luminosite+n, 
+			    	texColor.y*green*diffuse+luminosite+n, 
+			    	texColor.z*blue*diffuse+luminosite+n, 
+			    	alpha
+			    );
 
 			}
 		</script>
@@ -246,12 +165,12 @@
 
 		<object type="image/svg+xml" data="svg/frontieres3.svg" id="object"></object>
 		<div id="conteneur"></div>
+		<div id="control_annees">
+			<button id="btn_suivant" type="button">suivant</button>
+			<span id="current_year">2013</span>
+			<button id="btn_precedent" type="button">precedent</button>
+		</div>
 		<div id="classement">
-			<div id="classement_annees">
-				<button id="btn_suivant" type="button">suivant</button>
-				 <span id="current_year">2013</span>
-				 <button id="btn_precedent" type="button">precedent</button>
-			</div>
 		</div>
 	
 	</body>
