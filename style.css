@@ -1,6 +1,5 @@
 body
 {
-	position: relative;
 	text-align: center;
 	margin: 0; padding: 0;
 }
@@ -11,43 +10,11 @@ body
 	position: relative;
 	margin-left: auto;
   	margin-right: auto;
+
 }
 
 
 canvas
 {
-	position: absolute;
 	margin: 0; padding: 0;
-	top: 0; left: 0;
-	z-index: 0;
-}
-
-
-
-svg, object
-{
-	display: none;
-}
-
-
-
-#classement
-{
-	position: relative;
-	font-family: Arial, Verdana, sans-serif;
-	font-size: 1em;
-	width: 400px;
-	height: 800px;
-	top: 20px;
-	left: 20px;
-	overflow: scroll;
-	background-color: #ccc;
-	padding-left: 20px;
-	z-index: 1;
-}
-
-.itemPays:hover
-{
-	cursor: pointer;
-	color: #fff;
 }
