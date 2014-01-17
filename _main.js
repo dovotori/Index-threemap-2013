@@ -1,3 +1,4 @@
+
 window.addEventListener("load", setup, false);
 
 
@@ -319,6 +320,24 @@ var Dessin = function()
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /////////////////////////////////////////////
