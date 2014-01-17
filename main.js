@@ -387,24 +387,22 @@ var Dessin = function()
 
 	this.uniforms;
 
-<<<<<<< HEAD
-	this.setup = function(scene)
-	{
-		this.centroid = [];
 
-		var HG = projection([-180,84]);
-		var HD = projection([180,84]);
-		var BD = projection([180,-66]);
-		var BG = projection([-180,-66]);
-		var MG = projection([-180,0]);
-		var MD = projection([180,0]);
+	// this.setup = function(scene)
+	// {
+	// 	this.centroid = [];
 
-		// TEXTURE
-		var texture = THREE.ImageUtils.loadTexture("imageCarte.png");
-		// texture.wrapS = THREE.RepeatWrapping; 
-		// texture.wrapT = THREE.RepeatWrapping;
-=======
->>>>>>> c439085e1e9eb8a8228db416bf0cfed1f94f8a05
+	// 	var HG = projection([-180,84]);
+	// 	var HD = projection([180,84]);
+	// 	var BD = projection([180,-66]);
+	// 	var BG = projection([-180,-66]);
+	// 	var MG = projection([-180,0]);
+	// 	var MD = projection([180,0]);
+
+	// 	// TEXTURE
+	// 	var texture = THREE.ImageUtils.loadTexture("imageCarte.png");
+	// 	// texture.wrapS = THREE.RepeatWrapping; 
+	// 	// texture.wrapT = THREE.RepeatWrapping;
 
 
 	this.setup = function(scene, textureCarted3js)
@@ -513,7 +511,7 @@ var Dessin = function()
 
 		var attributes = {};
 
-<<<<<<< HEAD
+
 				// dessin de la forme pleine
 				var mesh = new THREE.Mesh( geometry, material );
 				//scene.add(mesh);
@@ -523,7 +521,7 @@ var Dessin = function()
 				line.position.set(0, 0, -1);
 				
 				//scene.add(line);
-=======
+
 		this.uniforms = {
 			delta: 	{type: 'f', value: 0.0},
 			scale: 	{type: 'f', value: 1.0},
@@ -536,7 +534,7 @@ var Dessin = function()
 			//tDiffuse:  { type: "t", value: textureCarted3js },
 			//exposure:  { type: "f", value: 1.5 },
 			//brightMax: { type: "f", value: 1.5 },
->>>>>>> c439085e1e9eb8a8228db416bf0cfed1f94f8a05
+
 
 		};
 
@@ -565,9 +563,9 @@ var Dessin = function()
 		}
 	}
 
-<<<<<<< HEAD
+
 		var delaunay = d3.geom.delaunay(this.centroid);
-=======
+
 
 
 	this.draw = function(scene)
@@ -589,7 +587,7 @@ var Dessin = function()
 
 	}
 
->>>>>>> c439085e1e9eb8a8228db416bf0cfed1f94f8a05
+
 
 
 
@@ -781,12 +779,9 @@ var Canvas = function()
 
 	}
 
-<<<<<<< HEAD
+
 	// GET / SET ///////////////////////////
 	this.getScene = function(){ return this.scene; }
-	
-}
-=======
 
 
 
@@ -897,7 +892,3 @@ function clickPays(isoPays)
 
 
 
-
-
-
->>>>>>> c439085e1e9eb8a8228db416bf0cfed1f94f8a05
