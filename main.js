@@ -3,12 +3,12 @@ window.addEventListener("load", setup, false);
 
 
 
-<<<<<<< HEAD
+
 var width = window.innerWidth;
 var height = window.innerHeight;
 
-=======
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+
 
 
 var canvas;
@@ -18,32 +18,30 @@ var projection = d3.geo
 	.mercator();
 	//.conicEquidistant();
 	//.orthographic();
-<<<<<<< HEAD
-	.mercator();
 projection.scale(80);
 var path = d3.geo.path().projection(projection);
 var pointsStructure;
 var infosPays;
 var currentYear;
 var hauteurMax;
-=======
+
 	
 var largeurFenetre = window.innerWidth;
 var path = d3.geo.path().projection(projection);
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 
 
 
-<<<<<<< HEAD
+
+
 function lireCsv(url, callback) {
 	d3.csv(url, function(d){ callback(null, d); });
 }
 function lireJson(url, callback) {
 	d3.json(url, function(d){ callback(null, d); });
 }
-=======
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+
 
 
 function setup()
@@ -57,7 +55,7 @@ function setup()
 }
 
 
-<<<<<<< HEAD
+
 function ready(error, results) 
 {
 
@@ -75,16 +73,6 @@ function ready(error, results)
 	textureCarted3js.needsUpdate = true;
 
 	// scene 3d
-=======
-
-
-
-
-
-function ready(error, results) 
-{
-
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 	canvas = new Canvas();
 	canvas.setup(window.innerWidth, window.innerHeight);
 	
@@ -95,26 +83,22 @@ function ready(error, results)
 	
 	animate();
 
-<<<<<<< HEAD
+
 	var btn_suivant = document.getElementById("btn_suivant");
 	var btn_precedent = document.getElementById("btn_precedent");
 	var btn_retour = document.getElementById("current_year");
 	btn_suivant.addEventListener("click", function(){ changerAnnee(-1); }, false);
 	btn_precedent.addEventListener("click", function(){ changerAnnee(1); }, false);
 	btn_retour.addEventListener("click", function(){ init(); }, false);
-=======
-}
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 
 	changerAnnee(-1);	
 
-<<<<<<< HEAD
 	//setTimeout(animate, 5000);
 	animate();
 	
 }
-=======
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+
 
 
 
@@ -141,7 +125,7 @@ function animate()
 function lireCsv(url, callback) {
 	d3.csv(url, function(d){ callback(null, d); });
 }
-<<<<<<< HEAD
+
 
 
 
@@ -227,10 +211,10 @@ function dessinDeLaCarteTexture(results0, results1)
 
 		});
 
-=======
+
 function lireJson(url, callback) {
 	d3.json(url, function(d){ callback(null, d); });
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 }
 
 
@@ -280,14 +264,14 @@ var Dessin = function()
 	// group.add( mesh );//add a mesh with geometry to it
 	// scene.add( group );//when done, add the group to the scene
 
-<<<<<<< HEAD
+
 	this.mesh;
 	this.transition;
 	this.lines;
 	this.line;
 	this.transitionLine;
-=======
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+
 
 
 	this.setup = function(scene)
@@ -343,7 +327,7 @@ var Dessin = function()
 		// texture.wrapT = THREE.RepeatWrapping;
 
 
-<<<<<<< HEAD
+
 	this.setup = function(scene, textureCarted3js)
 	{
 		
@@ -362,7 +346,7 @@ var Dessin = function()
 	    this.lines = [];
 
 	    geometrie = new THREE.Geometry();
-=======
+
 
 		//MATERIAL
 		this.materialMesh = new THREE.MeshLambertMaterial({ 
@@ -402,7 +386,7 @@ var Dessin = function()
 	}
 
 
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 
 	this.draw = function(scene, data, dataIndex)
@@ -424,7 +408,7 @@ var Dessin = function()
 					
 					isIndexed = true;
 
-<<<<<<< HEAD
+
 	    this.mesh = new THREE.Mesh(geometrie, this.materialShader);
 	    this.mesh.doubleSided = true;		
 	    scene.add(this.mesh);
@@ -458,7 +442,7 @@ var Dessin = function()
 			scene.add(this.lines[i]);
 		}
 	}
-=======
+
 					switch(dataIndex[l].cat)
 					{
 						case "Very serious situation": 	color = "#000000"; break;
@@ -475,13 +459,13 @@ var Dessin = function()
 
 			if(isIndexed)
 			{
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 
 				// calcul du centroid
 				var centroidTemporaire = path.centroid(data.features[k]);
 
-<<<<<<< HEAD
+
 
 
 
@@ -496,15 +480,15 @@ var Dessin = function()
 	    	//wireframeLinewidth: 1
 	    	vertexColors: THREE.VertexColors
 	    });
-=======
+
 				var centro = [centroidTemporaire[0], centroidTemporaire[1], -(k)*0.2 ];
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 				
 				this.centroid.push( centro );
 				//this.centroid[k] = [centroidTemporaire[0], centroidTemporaire[1], k-200 ];
 
-<<<<<<< HEAD
+
     	this.materialLine = new THREE.LineBasicMaterial({ 
     		color:0xe2ff06b,
     		transparent: true, 
@@ -535,7 +519,7 @@ var Dessin = function()
 		});
 		
 	}
-=======
+
 				// traits du centroid vers la note
 				var g = new THREE.Geometry();
 				g.vertices.push(new THREE.Vector3(centro[0], centro[1], 0));
@@ -573,7 +557,7 @@ var Dessin = function()
 				// dessin de la forme pleine
 				var mesh = new THREE.Mesh( geometry, material );
 				scene.add(mesh);
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 				// dessin de la ligne
 				var line = new THREE.Line(geometryBorder, this.material);
@@ -583,11 +567,11 @@ var Dessin = function()
 
 			}
 
-<<<<<<< HEAD
+
 	
-=======
+
 		}
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 		this.dessinerNotesPays(scene);
 
@@ -599,13 +583,13 @@ var Dessin = function()
 	this.dessinerNotesPays = function(scene)
 	{
 
-<<<<<<< HEAD
+
 		this.uniforms.delta.value += 0.1;
-=======
+
 		// delaunay sur les centroid
 		/*
 		var schema = d3.geom.delaunay(this.centroid);
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 		// dessin des centroids
 		for(var i = 0; i < schema.length; i++)
@@ -618,7 +602,7 @@ var Dessin = function()
 				geometry.vertices.push(new THREE.Vector3(schema[i][j][0], schema[i][j][1], schema[i][j][2]));
 				g.vertices.push(new THREE.Vector3(schema[i][j][0], schema[i][j][1], schema[i][j][2]));
 			}
-<<<<<<< HEAD
+
 			this.mesh.geometry.verticesNeedUpdate = true;	
       	}
 
@@ -629,7 +613,7 @@ var Dessin = function()
 			this.line.geometry.vertices[0].z = currentPosition;
 			this.line.geometry.verticesNeedUpdate = true;
 		}
-=======
+
 
 			// dessin de la ligne
 			var line = new THREE.Line(geometry, this.material2);
@@ -643,7 +627,7 @@ var Dessin = function()
 			scene.add(mesh);			
 			
 		}*/
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 	}
 
@@ -663,16 +647,16 @@ var Dessin = function()
 		        new THREE.Vector2( map(delaunay[i][2][0],1,1000,0,1), map(delaunay[i][2][1],1,1000,1,0) )
 	        ]);
 
-<<<<<<< HEAD
+
 		for(var i = 0; i < infosPays.length; i++)
       	{
 			this.transition[i].setup( this.mesh.geometry.vertices[infosPays[i][1]].z, -map(infosPays[i][2][currentYear], 180, 0, 0, hauteurMax ));
 			this.transition[i].setTween(1);
 			this.transition[i].setSpeed(0.1);
 		}
-=======
+
 	    }
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 	    geometrie.computeFaceNormals();
 
@@ -680,7 +664,7 @@ var Dessin = function()
 	    mesh.doubleSided = true;		
 	    scene.add(mesh);
 
-<<<<<<< HEAD
+
 
 
 	this.drawLine = function(paysId)
@@ -695,8 +679,8 @@ var Dessin = function()
 	this.deleteLine = function()
 	{
 		this.transitionLine.setup(0, -400);
-=======
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+
 	}
 
 }
@@ -744,7 +728,7 @@ var Canvas = function()
 	this.renderer;
 	this.scene;
 	this.centreCarte;
-<<<<<<< HEAD
+
 
 	this.xSouris; this.scrollSouris; this.mouseDown;
 	this.xSourisOld;
@@ -764,11 +748,11 @@ var Canvas = function()
 	this.transitionCamera;
 	this.transitionFocusCamera;
 
-=======
+
 	this.positionInitCam;
 	this.xSouris;
 	this.scrollSouris;
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 	this.setup = function(WIDTH, HEIGHT)
 	{
@@ -779,7 +763,7 @@ var Canvas = function()
 		    FAR = 10000;
 
 
-<<<<<<< HEAD
+
 		this.mouseDown = false;
 		this.scrollSouris = 100;
 		this.centreCarte = projection([0,0]);
@@ -811,7 +795,7 @@ var Canvas = function()
 		this.camera.lookAt(new THREE.Vector3( this.focusCamera[0], this.focusCamera[1], this.focusCamera[2] ));
 		this.scene.add(this.camera);
 
-=======
+
 		this.scrollSouris = 100
 
 		this.centreCarte = projection([0,0]);
@@ -824,13 +808,13 @@ var Canvas = function()
 		this.camera.up = new THREE.Vector3(0, 0, -1);
 
 		this.scene = new THREE.Scene();
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 	
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(WIDTH, HEIGHT);
 		this.renderer.setClearColor("#ffffff", 1);
 
-<<<<<<< HEAD
+
 		// LIGHT
 		this.scene.add( new THREE.AmbientLight( 0x888888 ) );
 
@@ -852,9 +836,9 @@ var Canvas = function()
 
     	var canvas = this.renderer.domElement;
 		document.body.appendChild(canvas);
-=======
+
 		document.body.appendChild(this.renderer.domElement);
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 		
 		var clone = this;
 		canvas.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
@@ -869,7 +853,7 @@ var Canvas = function()
 
 	this.draw = function()
 	{
-<<<<<<< HEAD
+
 
 		//this.positionSpot();
 		
@@ -893,17 +877,17 @@ var Canvas = function()
 		}
 		this.renderer.render(this.scene, this.camera);
 
-=======
+
 		this.scene.add(this.camera);
 		this.renderer.render(this.scene, this.camera);	
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 	}
 	
 
 	
 	this.onMouseMove = function(event)
 	{
-<<<<<<< HEAD
+
 		if(this.mouseDown)
 		{
 			this.xSouris = event.clientX;
@@ -925,7 +909,7 @@ var Canvas = function()
 
 	    var event = window.event || event;
 	    var delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
-=======
+
 		var xSouris = event.clientX;
 		//this.positionCamera();
 		this.camera.position.x = map(xSouris, 0, window.innerWidth, -1000, 1000);
@@ -940,7 +924,7 @@ var Canvas = function()
 	    // cross-browser wheel delta
 	    var e = window.event || e;
 	    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 	    this.scrollSouris += delta;
 	    this.scrollSouris = Math.min(this.scrollSouris, 70);
 	    this.scrollSouris = Math.max(this.scrollSouris, 40);
@@ -950,7 +934,7 @@ var Canvas = function()
 	
 	}
 
-<<<<<<< HEAD
+
 
 	this.onMouseDown = function(event)
 	{
@@ -981,16 +965,15 @@ var Canvas = function()
 		this.camera.position.y = y;
 		this.camera.lookAt( new THREE.Vector3(this.focusCamera[0], this.focusCamera[1], this.focusCamera[2] ) );
 
-		// lumiere opposée par rapport a la camera
-		/*
-		x = (Math.cos((angle+180)*(Math.PI/180)) * rayon) + centre[0];
-		y = (Math.sin((angle+180)*(Math.PI/180)) * rayon) + centre[1];
-		this.spot2.position.x = x;
-		this.spot2.position.y = y;
-		this.repereCube.position.x = x;
-		this.repereCube.position.y = y;
-		this.repereCube.position.z = 0;
-		*/
+		// lumiere opposée par rapport a la camera	
+		// x = (Math.cos((angle+180)*(Math.PI/180)) * rayon) + centre[0];
+		// y = (Math.sin((angle+180)*(Math.PI/180)) * rayon) + centre[1];
+		// this.spot2.position.x = x;
+		// this.spot2.position.y = y;
+		// this.repereCube.position.x = x;
+		// this.repereCube.position.y = y;
+		// this.repereCube.position.z = 0;
+		
 	}
 
 
@@ -1017,7 +1000,7 @@ var Canvas = function()
 
 
 
-=======
+
 	this.positionCamera = function()
 	{
 
@@ -1036,12 +1019,12 @@ var Canvas = function()
 		this.camera.position.x = coordonneesCamera[0]+this.positionInitCam[0];
 		this.camera.position.y = coordonneesCamera[1];
 		this.camera.lookAt(new THREE.Vector3(this.centreCarte[0], this.centreCarte[1], -100));
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 
 	}
 
 
-<<<<<<< HEAD
+
 	this.init = function()
 	{
 		if(this.isZoom)
@@ -1062,14 +1045,14 @@ var Canvas = function()
 	}
 
 
-=======
+
 	
 	
 	
 	// GET / SET ///////////////////////////
 	this.getScene = function(){ return this.scene; }
 	
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
 }
 
 
@@ -1085,7 +1068,7 @@ var Canvas = function()
 
 
 
-<<<<<<< HEAD
+
 
 
 
@@ -1164,5 +1147,5 @@ function init()
 
 
 
-=======
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
+
+
