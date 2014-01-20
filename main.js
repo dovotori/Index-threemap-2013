@@ -968,20 +968,34 @@ function changerAnnee(sens)
 	var displayYear = document.getElementById("current_year");
 	displayYear.innerHTML = 2013-currentYear;
 
+	var already = [];
 
 	// reclasser liste
 	var classement = d3.select("#classement");
 	for(var i = 0; i < infosPays.length; i++)
 	{
+		// rergler les egalités
+		var top = infosPays[i][2][currentYear]*20-20;
+		for(var j = 0; j < already.length; j++)
+		{
+			if(infosPays[i][2][currentYear] == already[j])
+			{
+				top += 20;
+			}
+		}
+		already.push(infosPays[i][2][currentYear]);
+		
+
 		classement.select("#"+infosPays[i][0])
 			.transition().duration(700)
-			.style("top", (infosPays[i][2][currentYear]*20-20)+"px")
+			.style("top", top+"px")
 			.text("#"+infosPays[i][2][currentYear]+" "+infosPays[i][4]);
 	}
 
 	dessin.changementAnnee();
 
 }
+
 
 
 
