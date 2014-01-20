@@ -562,7 +562,6 @@ var Dessin = function()
 		this.uniforms.lightPos.value = new THREE.Vector3(posLight.x, posLight.y, posLight.z);
 
 
-
 		// transition pour la forme lors du changement d'année
 		if(!this.transition[0].isFinished)
       	{
@@ -657,6 +656,7 @@ var Dessin = function()
 var Canvas = function()
 {
 
+	this.canvas;
 	this.renderer;
 	this.scene;
 	this.centreCarte;
@@ -743,21 +743,24 @@ var Canvas = function()
 
 
 		// REPERE CUBE
-		// this.repereCube = new THREE.Mesh(new THREE.CubeGeometry(10, 10, 10), new THREE.MeshNormalMaterial({ color: 0xff0000 }));
-  //   	this.repereCube.overdraw = true;
-  //   	this.repereCube.position.set(0, 0, 0);
-  //   	this.scene.add(this.repereCube);
+		this.repereCube = new THREE.Mesh(new THREE.CubeGeometry(10, 10, 10), new THREE.MeshNormalMaterial({ color: 0xff0000 }));
+    	this.repereCube.overdraw = true;
+    	this.repereCube.position.set(0, 0, 0);
+    	this.scene.add(this.repereCube);
 
 
-    	var canvas = this.renderer.domElement;
-		document.body.appendChild(canvas);
+    	this.canvas = this.renderer.domElement;
+		document.body.appendChild(this.canvas);
 		
+
+
 		var clone = this;
-		canvas.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
-		canvas.addEventListener("mousedown", function(event){ clone.onMouseDown(event); }, false);
-		canvas.addEventListener("mouseup", function(event){ clone.onMouseUp(event); }, false);
-		//canvas.addEventListener("mousewheel", function(event){ clone.onMouseScroll(event); }, false);
-		//canvas.addEventListener("DOMMouseScroll", function(event){ clone.onMouseScroll(event); }, false);
+		this.canvas.addEventListener("mousemove", function(event){ clone.onMouseMove(event); }, false);
+		this.canvas.addEventListener("mousedown", function(event){ clone.onMouseDown(event); }, false);
+		this.canvas.addEventListener("mouseup", function(event){ clone.onMouseUp(event); }, false);
+		this.canvas.addEventListener("mouseout", function(event){ clone.onMouseUp(event); }, false); // releve le clic si tu sort du canvas
+		//this.canvas.addEventListener("mousewheel", function(event){ clone.onMouseScroll(event); }, false);
+		//this.canvas.addEventListener("DOMMouseScroll", function(event){ clone.onMouseScroll(event); }, false);
 
 	}
 	
@@ -766,7 +769,25 @@ var Canvas = function()
 	this.draw = function()
 	{
 
-		this.positionSpot();
+		//this.positionSpot();
+
+		// test d'un point sur le repere
+		this.scene.updateMatrixWorld();
+		var vector = new THREE.Vector3();
+		var projector = new THREE.Projector();
+
+		projector.projectVector( vector.getPositionFromMatrix( this.repereCube.matrixWorld ), this.camera );
+
+		var widthHalf = this.canvas.clientWidth / 2;
+		var heightHalf = this.canvas.clientHeight / 2;
+
+		vector.x = ( vector.x * widthHalf ) + widthHalf;
+		vector.y = (-vector.y * heightHalf ) + heightHalf;
+
+		d3.select("#repere").style("left", vector.x+"px");
+		d3.select("#repere").style("top", vector.y+"px");
+
+
 		
 		// transition pour la position de la camera
 		if(!this.transitionCamera.isFinished)
@@ -800,10 +821,6 @@ var Canvas = function()
 		{
 			this.xSouris = event.clientX;
 			this.ySouris = event.clientY;
-
-			// var ySouris = event.clientY;
-			// this.camera.position.x = map(this.xSouris, 0, window.innerWidth, -1000, 1000);
-			// this.camera.position.z = map(ySouris, 0, window.innerHeight, -1000, 1000);
 
 			this.positionCamera();
 
@@ -850,6 +867,7 @@ var Canvas = function()
 
 
 
+
 	this.positionCamera = function()
 	{
 
@@ -865,13 +883,13 @@ var Canvas = function()
 		this.camera.lookAt( new THREE.Vector3(this.focusCamera[0], this.focusCamera[1], this.focusCamera[2] ) );
 
 		// lumiere opposée par rapport a la camera	
-		// x = (Math.cos((angle+180)*(Math.PI/180)) * rayon) + centre[0];
-		// y = (Math.sin((angle+180)*(Math.PI/180)) * rayon) + centre[1];
-		// this.spot2.position.x = x;
-		// this.spot2.position.y = y;
-		// this.repereCube.position.x = x;
-		// this.repereCube.position.y = y;
-		// this.repereCube.position.z = 0;
+		x = (Math.cos((this.angleCamera+180)*(Math.PI/180)) * this.rayonCamera) + this.focusCamera[0];
+		y = (Math.sin((this.angleCamera+180)*(Math.PI/180)) * this.rayonCamera) + this.focusCamera[1];
+		this.spot2.position.x = x;
+		this.spot2.position.y = y;
+		this.repereCube.position.x = x;
+		this.repereCube.position.y = y;
+		this.repereCube.position.z = 0;
 
 
 		// ROTATION VERTICALE
@@ -886,6 +904,7 @@ var Canvas = function()
 
 	this.moveCamToPays = function(paysId)
 	{
+
 		this.angleCamera = 90;
 		this.rayonCamera = projection([ 0, -10 ])[1];
 
@@ -898,6 +917,7 @@ var Canvas = function()
 			[ infosPays[ paysId][3][0], infosPays[paysId][3][1], -10 ] );
 
 		this.isZoom = true;
+
 	}
 
 	
@@ -914,8 +934,8 @@ var Canvas = function()
 
 		this.spot2.position.x = x;
 		this.spot2.position.y = y;
-		//this.repereCube.position.x = x;
-		//this.repereCube.position.y = y;
+		this.repereCube.position.x = x;
+		this.repereCube.position.y = y;
 
 	}
 
@@ -939,7 +959,13 @@ var Canvas = function()
 
 			this.isZoom = false;
 		}
-		
+
+	}
+
+
+	this.onResize = function(newWidth, newHeight)
+	{
+		this.renderer.setSize(newWidth, newHeight);
 	}
 
 
@@ -1047,6 +1073,24 @@ function init()
 		canvas.init();
 	}
 }
+
+
+
+window.addEventListener("resize", onresize, false);
+
+function onresize()
+{
+
+	var newWidth = window.innerWidth;
+	var newHeight = window.innerHeight;
+	canvas.onResize(newWidth, newHeight);
+
+}
+
+
+		
+
+
 
 
 

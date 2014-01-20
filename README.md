@@ -5,6 +5,7 @@
 - centroid basé sur la position des capitales OK
 - changement d'année avec transition des points OK
 - shader OK
+- fonction de transition pour la caméra OK
 
 Pays manquants sur la carte 
 - Cap-Vert OK
@@ -17,12 +18,12 @@ Pays manquants sur la carte
 - Seychelles OK
 - Singapour OK
 - Bahreïn OK
-- Andorre ??
-- Liechtenstein ?? trou dans la map 
+- Andorre -> trou dans la map
+- Liechtenstein -> trou dans la map car - pas de notes ( mettre à zero ?? )
+- Israël deux notes
 
 
 - attendre que la texture d3.js soit chargée
-- fonction de transition pour la caméra
 - hammer.js pour les interactions sur tablette et smartphone
 - revoir les couleurs
 - responsive
@@ -31,6 +32,6 @@ Pays manquants sur la carte
 A tester
 - lumiere opposée à la camera OK
 - profondeur de champs (ça à l'air chaud)
-- traits OK
+- traits OK mais illisible
 - POSITION DANS LE CANVAS var position = new THREE.Vector3().getPositionFromMatrix( object.matrixWorld );
 

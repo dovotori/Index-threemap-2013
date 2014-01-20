@@ -43,7 +43,6 @@ svg, object
 	font-size: 1em;
 	width: 400px;
 	height: 800px;
-	top: 20px;
 	left: 20px;
 	overflow: scroll;
 	background-color: #ccc;
@@ -56,3 +55,16 @@ svg, object
 	cursor: pointer;
 	color: #fff;
 }
+
+
+#repere
+{
+	position: absolute;
+	z-index: 3;
+}
+
+
+
+
+
+

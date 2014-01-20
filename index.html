@@ -94,7 +94,7 @@
 			    float n = noise * ( .5 - random( vec3( 1. ), length( gl_FragCoord ) ) );
 
 			    // luminosite
-			    float luminosite = 0.0;
+			    float luminosite = 0.2;
 
 			    
 			    
@@ -140,7 +140,9 @@
 				*/
 				
 
-
+				red = map(hauteurPoint, 0.0, hauteurMax, 0.0, 1.0);
+				green = map(hauteurPoint, 0.0, hauteurMax, 0.4, 1.0);
+				blue = map(hauteurPoint, 0.0, hauteurMax, 0.6, 1.0);
 
 
 
@@ -152,9 +154,9 @@
 			    // 	alpha);
 
 			    gl_FragColor = vec4(
-			    	red*diffuse+luminosite+n, 
-			    	green*diffuse+luminosite+n, 
-			    	blue*diffuse+luminosite+n, 
+			    	texColor.x*red*diffuse+luminosite+n, 
+			    	texColor.y*green*diffuse+luminosite+n, 
+			    	texColor.z*blue*diffuse+luminosite+n, 
 			    	alpha
 			    );
 
@@ -163,17 +165,18 @@
 
 
 
-		<object type="image/svg+xml" data="svg/frontieres3.svg" id="object"></object>
-		<div id="conteneur"></div>
+		<object type="image/svg+xml" data="svg/frontieres4.svg" id="object"></object>
+		
 		<div id="control_annees">
 			<button id="btn_suivant" type="button">suivant</button>
 			<span id="current_year">2013</span>
 			<button id="btn_precedent" type="button">precedent</button>
 		</div>
-		<div id="classement">
-		</div>
 
 
+		<div id="classement"></div>
+
+		<div id="repere">Repere</div>
 		
 		<div id="conteneur"></div>
 
