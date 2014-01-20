@@ -1,5 +1,6 @@
 body
 {
+	position: relative;
 	text-align: center;
 	margin: 0; padding: 0;
 }
@@ -10,14 +11,13 @@ body
 	position: relative;
 	margin-left: auto;
   	margin-right: auto;
-
 }
 
 
 canvas
 {
+	position: absolute;
 	margin: 0; padding: 0;
-<<<<<<< HEAD
 	top: 40px; left: 0;
 	z-index: 0;
 }
@@ -55,6 +55,4 @@ svg, object
 {
 	cursor: pointer;
 	color: #fff;
-=======
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
 }

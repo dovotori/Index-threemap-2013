@@ -1,22 +1,36 @@
 
 
-- caméra isometrique ou projection orthogonale
-- texture de la carte projetée sur le relief
-- centroid basé sur la position des capitales
-- fonction de transition pour la caméra et pour le mouvements des points
-- changement d'année
-- note des pays en pastille posée sur le relief (donc texte dans three.js)
+- caméra isometrique ou projection orthogonale OK
+- texture de la carte projetée sur le relief OK
+- centroid basé sur la position des capitales OK
+- changement d'année avec transition des points OK
+- shader OK
+
+Pays manquants sur la carte 
+- Cap-Vert OK
+- OECS(Organization of Eastern Caribbean States) OK
+- Malte OK
+- Comores OK
+- Hong-Kong OK
+- Maurice OK
+- Kosovo OK
+- Seychelles OK
+- Singapour OK
+- Bahreïn OK
+- Andorre ??
+- Liechtenstein ?? trou dans la map 
+
+
+- attendre que la texture d3.js soit chargée
+- fonction de transition pour la caméra
 - hammer.js pour les interactions sur tablette et smartphone
 - revoir les couleurs
-- profondeur de champs
+- responsive
 
 
-<<<<<<< HEAD
 A tester
 - lumiere opposée à la camera OK
 - profondeur de champs (ça à l'air chaud)
 - traits OK
 - POSITION DANS LE CANVAS var position = new THREE.Vector3().getPositionFromMatrix( object.matrixWorld );
 
-=======
->>>>>>> 0ac9bc2acd83295aa005d9fe98b1f2b021080406
