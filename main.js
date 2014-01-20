@@ -102,7 +102,7 @@ function animate()
 {
 
 	requestAnimationFrame(animate);	
-	dessin.draw(canvas.scene);
+	dessin.draw(canvas.scene, canvas.spot2.position);
 	canvas.draw();
 	
 }
@@ -130,20 +130,14 @@ function ajoutDesPointsDuFormatDeLaCarte()
 	var HD = projection([180,	84]);
 	var BD = projection([180,	-84]);
 	var BG = projection([-180,	-84]);
-	var MG = projection([-180,	0]);
-	var MD = projection([180,	0]);
 
 	pointsStructure.push({ x: HG[0], y: HG[1], z:0 });
 	pointsStructure.push({ x: HD[0], y: HD[1], z:0 });
-	pointsStructure.push({ x: MG[0], y: MG[1], z:0 });
-	pointsStructure.push({ x: MD[0], y: MD[1], z:0 });
 	pointsStructure.push({ x: BG[0], y: BG[1], z:0 });
 	pointsStructure.push({ x: BD[0], y: BD[1], z:0 });
 
 	// pointsStructure.push( [ HG[0] , HG[1] , 0 ]);
 	// pointsStructure.push( [ HD[0] , HD[1] , 0 ]);
-	// pointsStructure.push( [ MG[0] , MG[1] , 0 ]);
-	// pointsStructure.push( [ MD[0] , MD[1] , 0 ]);
 	// pointsStructure.push( [ BG[0] , BG[1] , 0 ]);
 	// pointsStructure.push( [ BD[0] , BD[1] , 0 ]);
 
@@ -561,22 +555,25 @@ var Dessin = function()
 
 
 
-	this.draw = function(scene)
-	{		
+	this.draw = function(scene, posLight)
+	{	
+
+		// update de la position de la lumiere
+		this.uniforms.lightPos.value = new THREE.Vector3(posLight.x, posLight.y, posLight.z);
 
 
 
+		// transition pour la forme lors du changement d'année
 		if(!this.transition[0].isFinished)
       	{
       		for(var i = 0; i < infosPays.length; i++)
       		{
 				this.mesh.geometry.vertices[infosPays[i][1]].z = this.transition[i].execute();
-
 			}
 			this.mesh.geometry.verticesNeedUpdate = true;	
       	}
 
-
+      	// transition pour le trait lors du click sur un pays
       	if(!this.transitionLine.isFinished)
 		{
 			var currentPosition = this.transitionLine.execute();
@@ -664,8 +661,10 @@ var Canvas = function()
 	this.scene;
 	this.centreCarte;
 
-	this.xSouris; this.scrollSouris; this.mouseDown;
-	this.xSourisOld;
+	this.xSouris, this.xSourisOld;
+	this.ySouris, this.ySourisOld;
+	this.mouseDown;
+	this.scrollSouris; 
 	
 	this.spot1; this.spot2;
 	this.angleSpot;
@@ -697,6 +696,7 @@ var Canvas = function()
 		this.centreCarte = projection([0,0]);
 		this.angleSpot = 0;
 		this.xSouris = 0; this.xSourisOld = 0;
+		this.ySouris = 0; this.ySourisOld = 0;
 
 
 		// SCENE
@@ -738,7 +738,7 @@ var Canvas = function()
 		this.scene.add(this.spot1);
 
 		this.spot2 = new THREE.DirectionalLight( 0xffffff, 0.4 );
-		this.spot2.position.set( 200, 0, -200 );
+		this.spot2.position.set( 200, 0, -500 );
 		this.scene.add(this.spot2);
 
 
@@ -766,9 +766,9 @@ var Canvas = function()
 	this.draw = function()
 	{
 
-		//this.positionSpot();
+		this.positionSpot();
 		
-		// transition pour la poistion de la camera
+		// transition pour la position de la camera
 		if(!this.transitionCamera.isFinished)
 		{
 			var currentPos = this.transitionCamera.execute3d();
@@ -786,6 +786,8 @@ var Canvas = function()
 		} else {
 			this.camera.lookAt(new THREE.Vector3(this.focusCamera[0], this.focusCamera[1], this.focusCamera[2]));
 		}
+
+		// rendu
 		this.renderer.render(this.scene, this.camera);
 
 	}
@@ -797,13 +799,16 @@ var Canvas = function()
 		if(this.mouseDown)
 		{
 			this.xSouris = event.clientX;
+			this.ySouris = event.clientY;
 
 			// var ySouris = event.clientY;
 			// this.camera.position.x = map(this.xSouris, 0, window.innerWidth, -1000, 1000);
 			// this.camera.position.z = map(ySouris, 0, window.innerHeight, -1000, 1000);
 
 			this.positionCamera();
+
 			this.xSourisOld = this.xSouris;
+			this.ySourisOld = this.ySouris;
 		}
 		return false;
 	}
@@ -826,12 +831,16 @@ var Canvas = function()
 	}
 
 
+
 	this.onMouseDown = function(event)
 	{
 		this.mouseDown = true;
 		this.xSouris = event.clientX;
 		this.xSourisOld = this.xSouris;
+		this.ySouris = event.clientY;
+		this.ySourisOld = this.ySouris;
 	}
+
 
 
 	this.onMouseUp = function(event)
@@ -844,7 +853,7 @@ var Canvas = function()
 	this.positionCamera = function()
 	{
 
-		// ANGLE CAMERA
+		// ROTATION HORIZONTALE
 		//this.angleCamera = map(this.xSouris, 0, largeurFenetre, 0, 180);
 		this.angleCamera += (this.xSouris - this.xSourisOld) * 0.1;
 
@@ -863,10 +872,15 @@ var Canvas = function()
 		// this.repereCube.position.x = x;
 		// this.repereCube.position.y = y;
 		// this.repereCube.position.z = 0;
-		
+
+
+		// ROTATION VERTICALE
+		var dragY = (this.ySouris - this.ySourisOld);
+		if((this.rayonCamera > 60 && dragY < 0) || (this.rayonCamera < 500 && dragY > 0) )
+		{
+			this.rayonCamera += dragY;
+		}
 	}
-
-
 
 
 
@@ -888,11 +902,9 @@ var Canvas = function()
 
 	
 
-
-
-
 	this.positionSpot = function()
 	{
+
 		this.angleSpot++;
 		var rayon = 1000;
 		var centre = this.centreCarte;
@@ -900,15 +912,18 @@ var Canvas = function()
 		var x = (Math.cos(this.angleSpot*(Math.PI/180)) * rayon)+centre[0];
 		var y = (Math.sin(this.angleSpot*(Math.PI/180)) * rayon)+centre[1];
 
-		this.repereCube.position.x = x;
 		this.spot2.position.x = x;
-		this.repereCube.position.y = y;
 		this.spot2.position.y = y;
+		//this.repereCube.position.x = x;
+		//this.repereCube.position.y = y;
+
 	}
+
 
 
 	this.init = function()
 	{
+
 		if(this.isZoom)
 		{
 			this.angleCamera = 90;
@@ -924,6 +939,7 @@ var Canvas = function()
 
 			this.isZoom = false;
 		}
+		
 	}
 
 
@@ -983,6 +999,7 @@ function changerAnnee(sens)
 				top += 20;
 			}
 		}
+
 		already.push(infosPays[i][2][currentYear]);
 		
 
@@ -1004,14 +1021,14 @@ function clickPays(isoPays)
 {
 
 	var id;
-	var classement = d3.select("#classement");
+	var classement = d3.selectAll(".itemPays");
 	classement.style("color", "black");
 	for(var i = 0; i < infosPays.length; i++)
 	{
 		if(isoPays == infosPays[i][0])
 		{
-			
 			id = i;
+			d3.selectAll("#"+infosPays[id][0]).style("color", "#0a0");
 		}
 	}
 

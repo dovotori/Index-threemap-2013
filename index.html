@@ -152,9 +152,9 @@
 			    // 	alpha);
 
 			    gl_FragColor = vec4(
-			    	texColor.x*red*diffuse+luminosite+n, 
-			    	texColor.y*green*diffuse+luminosite+n, 
-			    	texColor.z*blue*diffuse+luminosite+n, 
+			    	red*diffuse+luminosite+n, 
+			    	green*diffuse+luminosite+n, 
+			    	blue*diffuse+luminosite+n, 
 			    	alpha
 			    );
 
