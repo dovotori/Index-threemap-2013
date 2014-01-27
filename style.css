@@ -45,8 +45,7 @@ svg, object
 	height: 800px;
 	left: 20px;
 	overflow: scroll;
-	background-color: #ccc;
-	padding: 20px;
+	background-color: #fff;
 	z-index: 1;
 }
 

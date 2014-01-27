@@ -3,16 +3,16 @@
 	<head>
 		<meta charset="UTF-8">
 		
-		<title>Carte Three</title>
+		<title>Carte Three Heightmap</title>
 		
 		<link rel="stylesheet" type="text/css" href="style.css" >
 		
-		<script type="text/javascript" src="three.js"></script>
-		<script type="text/javascript" src="d3.js"></script>
-		<script type="text/javascript" src="queue.js"></script>
-		<script type="text/javascript" src="utils.js"></script>
-		<script type="text/javascript" src="delaunay.js"></script>
-		<script type="text/javascript" src="main.js"></script>
+		<script type="text/javascript" src="js/three.js"></script>
+		<script type="text/javascript" src="js/d3.js"></script>
+		<script type="text/javascript" src="js/queue.js"></script>
+		<script type="text/javascript" src="js/utils.js"></script>
+		<script type="text/javascript" src="js/main.js"></script>
+		<script type="text/javascript" src="js/ShaderTerrain.js"></script>
 		
 	</head>
 	
@@ -20,165 +20,19 @@
 
 
 
-
-
-
-		<!-- FUN SHADER -->
-		<script type="x-shader/x-vertex" id="vertexShader">
-			varying vec2 vUv;
-			uniform float delta;
-			uniform float scale;
-			uniform float alpha;
-			varying vec3 vNormal;
-			varying float hauteurPoint;
-
-			void main()
-			{
-				vNormal = normal;
-			    vUv = uv;
-
-			    // mouvement
-			    /*
-			    vec3 p = position;
-			    p.z += sin(2.0 * p.y + delta) * 5.0;
-			    p.z += cos(2.0 * p.z + delta / 2.0) * 5.0;
-			    p.z += cos(2.0 * p.x + delta) * 5.0;
-			    p.x += sin(p.y + delta / 2.0) * 10.0;
-			    */
-
-			    hauteurPoint = -position.z;
-
-			    //gl_Position = projectionMatrix * modelViewMatrix * vec4(scale * p, 1.0 );
-			    gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-			}
-		</script>
-
-		<script type="x-shader/x-fragment" id="fragmentShader">
-			#ifdef GL_ES
-			precision highp float;
-			#endif
-			uniform float delta;
-			uniform float alpha;
-			uniform float noise;
-			uniform float hauteurMax;
-			uniform vec3 lightPos;
-
-			varying vec2 vUv;
-			varying vec3 vNormal;
-			varying float hauteurPoint;
-
-			uniform sampler2D texture;
-
-			float random(vec3 scale,float seed){
-			    return fract(sin(dot(gl_FragCoord.xyz+seed,scale)) * 43758.5453 + seed);
-			}
-
-			float map(float valeur, float minRef, float maxRef, float minDest, float maxDest)
-			{
-				return minDest + (valeur - minRef) * (maxDest - minDest) / (maxRef - minRef);
-			}
-
-			void main(void)
-			{
-				// texture
-				vec4 texColor = texture2D( texture, vUv );
-
-				// normal
-				//vec3 light = vec3(0.5, 0.2, -10.0);
-				vec3 light = lightPos;
-				light = normalize(light);
-				float diffuse = max(0.0, dot(vNormal, light));
-
-
-				// noise
-			    float n = noise * ( .5 - random( vec3( 1. ), length( gl_FragCoord ) ) );
-
-			    // luminosite
-			    float luminosite = 0.2;
-
-			    
-			    
-
-			    float red = 0.0; 
-			    float green = 0.4;
-			    float blue = 0.6;
-
-
-				/*
-				if(hauteurPoint < hauteurMax/5.000){
-					// de noir à rouge
-					red = map(hauteurPoint, 0.000, hauteurMax/5.000 , 0.200 , 1.000);
-					green = 0.200;
-					blue = 0.200;
-				}else if(hauteurPoint < 2.000*hauteurMax/5.000){
-					// de rouge à orange
-					red = 1.000;
-					green = map(hauteurPoint, hauteurMax/5.000, 2.000*hauteurMax/5.000 , 0.200 , 0.500);
-					blue = 0.200;
-				}else if(hauteurPoint < 3.000*hauteurMax/5.000){
-					// de orange à jaune
-					red = 1.000;
-					green = map(hauteurPoint, 2.000*hauteurMax/5.000, 3.000*hauteurMax/5.000 , 0.500 , 1.000);
-					blue = 0.200;
-				}else {
-					// de jaune à blanc
-					red = 1.000;
-					green = 1.000;
-					blue = map(hauteurPoint, 3.000*hauteurMax/5.000, 4.000*hauteurMax/5.000 , 0.200 , 1.000);
-				}
-				*/
-
-
-				/*
-				float moduloHeight = mod(hauteurPoint,2.0);
-				if( moduloHeight > 0.0 && moduloHeight < 0.1)
-				{
-					red = 1.0;
-					green = 1.0;
-					blue = 1.0;
-				}
-				*/
-				
-
-				red = map(hauteurPoint, 0.0, hauteurMax, 0.0, 1.0);
-				green = map(hauteurPoint, 0.0, hauteurMax, 0.4, 1.0);
-				blue = map(hauteurPoint, 0.0, hauteurMax, 0.6, 1.0);
-
-
-
-			    // rendu
-			    // gl_FragColor = vec4(
-			    // 	texColor.x*(diffuse*2.0)*newHauteur+n+0.1, 
-			    // 	texColor.y*(diffuse*2.0)*0.4+n+0.1, 
-			    // 	texColor.z*(diffuse*2.0)*0.200+n+0.1, 
-			    // 	alpha);
-
-			    gl_FragColor = vec4(
-			    	texColor.x*red*diffuse+luminosite+n, 
-			    	texColor.y*green*diffuse+luminosite+n, 
-			    	texColor.z*blue*diffuse+luminosite+n, 
-			    	alpha
-			    );
-
-			}
-		</script>
-
-
-
-		<object type="image/svg+xml" data="svg/frontieres4.svg" id="object"></object>
 		
 		<div id="control_annees">
-			<button id="btn_suivant" type="button">suivant</button>
-			<span id="current_year">2013</span>
+			
 			<button id="btn_precedent" type="button">precedent</button>
+			<span id="current_year">2013</span>
+			<button id="btn_suivant" type="button">suivant</button>
+			
 		</div>
 
+		<div id="carte"></div>
 
 		<div id="classement"></div>
-
-		<div id="repere">Repere</div>
 		
-		<div id="conteneur"></div>
 
 	
 	</body>
